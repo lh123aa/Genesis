@@ -59,7 +59,7 @@ start opencode
 
 **使用示例：**
 ```
-@genesis 采集卡塔尔活动日历 https://visitqatar.com/intl-en/events-calendar 的所有活动，翻译为中文，保存到本地
+@genesis 分析这个目标：帮我研究如何在React中实现状态管理
 ```
 
 **使用 Genesis Agent：**
