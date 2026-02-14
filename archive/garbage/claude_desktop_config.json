@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "genesis": {
+      "command": "npx",
+      "args": ["-y", "@project-genesis/mcp-server"],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

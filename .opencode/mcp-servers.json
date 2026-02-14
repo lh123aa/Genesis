@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "genesis": {
+      "command": "node",
+      "args": [
+        "E:/程序/Agents/packages/mcp-server/dist/index.js"
+      ],
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  }
+}

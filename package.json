@@ -1,0 +1,11 @@
+{
+  "name": "project-genesis",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

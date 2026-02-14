@@ -1,0 +1,10 @@
+- "需要你重新设计" - Need complete redesign
+- "notion的极简、深色主题或者可切换" - Notion minimalism, dark theme or switchable
+- "黑白就可以" - Black/white is enough
+- "小时候的红白机那种有些复古风格，但是页面显示的内容感觉又很高级" - NES retro style but content feels premium
+- "主Agent在最上，其他Agent并排一行" - Main agent on top, others in a row
+- "卡片和卡片之间保持一定距离" - Cards need proper spacing
+- "需要一个我布置任务的窗口" - Need a task input window
+- "动画原则主要在员工卡片中，可以有些互动相应，其他地方不需要" - Animation only on card interactions, nowhere else
+- "用不着占整个屏幕，就中间一部分就好" - Don't fill whole screen, center portion is fine
+- "减少认知负担（过多信息太杂乱不行）" - Reduce cognitive load (too much info is bad)

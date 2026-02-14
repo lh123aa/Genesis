@@ -1,0 +1,18 @@
+{
+  "name": "@project-genesis/backend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "tsx src/index.ts",
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@fastify/cors": "^11.2.0",
+    "@project-genesis/shared": "*",
+    "fastify": "^5.7.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "tsx": "^4.19.0"
+  }
+}

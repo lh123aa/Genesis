@@ -1,0 +1,1 @@
+{"version":3,"file":"loop-detector.d.ts","sourceRoot":"","sources":["loop-detector.ts"],"names":[],"mappings":"AAEA,qBAAa,iBAAkB,SAAQ,KAAK;gBAC9B,OAAO,EAAE,MAAM;CAI5B;AAED,qBAAa,YAAY;IACvB,OAAO,CAAC,OAAO,CAAgB;IAC/B,OAAO,CAAC,UAAU,CAAc;;IAIhC;;;OAGG;IACH,YAAY,CAAC,UAAU,EAAE,MAAM,GAAG,IAAI;IAatC,OAAO,CAAC,gBAAgB;IASxB,KAAK,IAAI,IAAI;CAGd"}
