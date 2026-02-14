@@ -3,167 +3,126 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![npm version](https://img.shields.io/npm/v/@project-genesis/mcp-server.svg)](https://www.npmjs.com/package/@project-genesis/mcp-server)
 
-> **Personal Agent Orchestration System** - Coordinate multiple AI agents to execute complex development workflows through the Model Context Protocol (MCP).
+> **个人 Agent 编排系统** - 通过 Model Context Protocol (MCP) 协调多个 AI Agent 执行复杂的开发工作流。
 
-## ✨ Features
+## ✨ 功能特性
 
-- 🤖 **Multi-Agent Coordination** - Orchestrate Scout, Coder, Tester, Reviewer, and Docs agents
-- 📋 **Workflow Management** - Create, save, and execute reusable workflows
-- 💾 **SQLite Persistence** - Local database for workflows and execution history
-- 📊 **Cost Tracking** - Monitor token usage and execution costs
-- 🔌 **MCP Compatible** - Works with OpenCode, Claude Desktop, and any MCP client
-- ⚡ **Zero Config** - Stdio transport, works out of the box
-- 📝 **Skill Integration** - Natural language interface via SKILL.md
+- 🤖 **多 Agent 协调** - 编排 Scout、Coder、Tester、Reviewer 和 Docs Agent
+- 📋 **工作流管理** - 创建、保存和执行可复用的工作流
+- 💾 **SQLite 持久化** - 本地数据库存储工作流和执行历史
+- 📊 **成本追踪** - 监控 Token 使用量和执行成本
+- 🔌 **MCP 兼容** - 支持 OpenCode、Claude Desktop 和任何 MCP 客户端
+- ⚡ **零配置** - Stdio 传输，开箱即用
+- 📝 **Skill 集成** - 通过 SKILL.md 实现自然语言接口
+- 🎨 **J.A.R.V.I.S. UI** - 未来科技感的管理界面
 
-## 🚀 Quick Start
+## 🚀 快速开始
 
-### Installation
-
-```bash
-npm install -g @project-genesis/mcp-server
-```
-
-### Configuration
-
-#### OpenCode
-
-Add to `.opencode/mcp-servers.json`:
-
-```json
-{
-  "mcpServers": {
-    "genesis": {
-      "command": "npx",
-      "args": ["-y", "@project-genesis/mcp-server"]
-    }
-  }
-}
-```
-
-#### Claude Desktop
-
-Add to `claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "genesis": {
-      "command": "npx",
-      "args": ["-y", "@project-genesis/mcp-server"]
-    }
-  }
-}
-```
-
-### Usage
-
-Once configured, use natural language in your AI assistant:
-
-```markdown
-@genesis Execute workflow "feature-development" for "implement dark mode"
-```
-
-```markdown
-@genesis Orchestrate:
-- Scout: Research authentication best practices
-- Coder: Implement JWT authentication
-- Tester: Write authentication tests
-- Reviewer: Review security implementation
-```
-
-## 📚 Documentation
-
-- [Installation Guide](./packages/mcp-server/README.md)
-- [Workflow Examples](./.claude/skills/genesis/examples/)
-- [Skill Documentation](./.claude/skills/genesis/SKILL.md)
-- [API Reference](./packages/mcp-server/README.md#available-tools)
-
-## 🎯 Available Workflows
-
-| Workflow | Description |
-|----------|-------------|
-| `code-review` | Multi-perspective code review |
-| `feature-development` | Complete feature lifecycle |
-| `bug-fix` | Systematic debugging |
-| `refactoring` | Safe code refactoring |
-| `api-integration` | Third-party API integration |
-| `documentation` | Documentation generation |
-| `testing` | Comprehensive test suite |
-| `security-audit` | Security analysis |
-| `onboarding` | New developer onboarding |
-| `performance-optimization` | Performance tuning |
-
-## 🏗️ Architecture
-
-```
-User (OpenCode/Claude/Cursor)
-           │
-           ▼ MCP (stdio)
-┌─────────────────────────────┐
-│   Project Genesis MCP       │
-│   Server                    │
-└───────────┬─────────────────┘
-            │
-    ┌───────┴──────┐
-    ▼              ▼
-┌──────────┐  ┌─────────────┐
-│ SQLite   │  │ File System │
-│ (State)  │  │ (Workflows) │
-└──────────┘  └─────────────┘
-```
-
-## 🛠️ Development
+### 本地开发
 
 ```bash
-# Clone repository
-git clone https://github.com/yourusername/project-genesis.git
-cd project-genesis
+# 克隆仓库
+git clone https://github.com/lh123aa/Genesis.git
+cd Genesis
 
-# Install dependencies
+# 安装依赖
 npm install
 
-# Build
-npm run build -w packages/mcp-server
+# 构建共享包（必须）
+npm run build -w packages/shared
 
-# Run tests
-npm test -w packages/mcp-server
+# 启动后端 (端口 3002)
+npm run dev -w apps/backend
 
-# Development mode
-npm run dev -w packages/mcp-server
+# 启动前端 (端口 3000)
+npm run dev -w apps/frontend
 ```
 
-## 📦 Packages
+### 启动基础设施（可选）
 
-| Package | Description | Version |
-|---------|-------------|---------|
-| [`@project-genesis/mcp-server`](./packages/mcp-server) | MCP Server implementation | 0.1.0 |
-| [`@project-genesis/shared`](./packages/shared) | Shared utilities | 0.1.0 |
+```bash
+# 启动 Redis 和 Weaviate
+docker-compose -f archive/v1/docker-compose.yml up -d
+```
 
-## 🤝 Contributing
+### 访问
 
-Contributions are welcome! Please read our [Contributing Guide](./CONTRIBUTING.md) for details.
+- 前端仪表盘：http://localhost:3000
+- 后端 API：http://localhost:3002
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 📚 文档
 
-## 📝 License
+- [Agent 操作指南](./AGENTS.md)
+- [Skill 文档](./.claude/skills/genesis/SKILL.md)
+- [工作流示例](./.claude/skills/genesis/examples/)
 
-This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
+## 🏗️ 项目架构
 
-## 🙏 Acknowledgments
+```
+apps/
+  ├── frontend/    # Next.js 14 前端 (端口 3000)
+  └── backend/     # Fastify v5 后端 (端口 3002)
+packages/
+  └── shared/      # 共享工具包
+```
 
-- [Model Context Protocol](https://modelcontextprotocol.io/) - The open standard powering this project
-- [OpenCode](https://opencode.ai/) - AI coding assistant platform
-- [Anthropic](https://www.anthropic.com/) - Claude and MCP creators
+### 技术栈
 
-## 📊 Project Stats
+| 层级 | 技术 |
+|------|------|
+| 前端 | Next.js 14, React, Tailwind CSS v4, SWR, Recharts |
+| 后端 | Fastify v5, TypeScript |
+| 存储 | Redis, Weaviate, SQLite |
+| Agent | MCP (Model Context Protocol) |
 
-![GitHub stars](https://img.shields.io/github/stars/yourusername/project-genesis?style=social)
-![GitHub forks](https://img.shields.io/github/forks/yourusername/project-genesis?style=social)
+### 核心模块
+
+- **Panopticon** - 系统监控：Logger, Tracer, CircuitBreaker, LoopDetector, CostController, SOPRegistry
+- **Memory** - 记忆存储：Redis, Weaviate
+
+## 📦 工作区包
+
+| 包 | 描述 | 版本 |
+|---|------|------|
+| [`@project-genesis/frontend`](./apps/frontend) | Next.js 管理界面 | 0.1.0 |
+| [`@project-genesis/backend`](./apps/backend) | Fastify API 服务 | 0.1.0 |
+| [`@project-genesis/shared`](./packages/shared) | 共享工具库 | 0.1.0 |
+
+## 🎯 可用工作流
+
+| 工作流 | 描述 |
+|--------|------|
+| `code-review` | 多角度代码审查 |
+| `feature-development` | 完整功能生命周期 |
+| `bug-fix` | 系统化调试 |
+| `refactoring` | 安全代码重构 |
+| `api-integration` | 第三方 API 集成 |
+| `documentation` | 文档生成 |
+| `testing` | 全面测试套件 |
+| `security-audit` | 安全分析 |
+| `onboarding` | 新开发者入门 |
+| `performance-optimization` | 性能调优 |
+
+## 🤝 贡献指南
+
+欢迎贡献！请阅读 [CONTRIBUTING.md](./CONTRIBUTING.md) 了解更多。
+
+1. Fork 仓库
+2. 创建功能分支 (`git checkout -b feature/amazing-feature`)
+3. 提交更改 (`git commit -m 'Add amazing feature'`)
+4. 推送到分支 (`git push origin feature/amazing-feature`)
+5. 提交 Pull Request
+
+## 📝 许可证
+
+本项目基于 MIT 许可证 - 查看 [LICENSE](./LICENSE) 了解更多。
+
+## 🙏 致谢
+
+- [Model Context Protocol](https://modelcontextprotocol.io/) - 驱动本项目的开放标准
+- [OpenCode](https://opencode.ai/) - AI 编程助手平台
+- [Anthropic](https://www.anthropic.com/) - Claude 和 MCP 的创造者
 
 ---
 
-<p align="center">Built with ❤️ for the AI developer community</p>
+<p align="center">用 ❤️ 为 AI 开发者社区构建</p>
