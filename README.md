@@ -17,9 +17,57 @@
 ### 环境要求
 
 - Node.js 18+
-- Docker (用于 Redis 和 Weaviate)
+- Docker (可选，用于 Redis 和 Weaviate)
 
-### 安装运行
+### 方式一：OpenCode + MCP Server（推荐）
+
+这是使用 Genesis Agent 系统的标准方式。
+
+```bash
+# 1. 克隆仓库
+git clone https://github.com/lh123aa/Genesis.git
+cd Genesis
+
+# 2. 安装依赖
+npm install
+
+# 3. 构建 MCP Server（必须）
+npm run build -w packages/mcp-server
+
+# 4. 启动 OpenCode
+start opencode
+```
+
+**首次使用：**
+1. 第一次启动 OpenCode 后，**完全关闭** OpenCode 窗口
+2. **重新打开** OpenCode，让 MCP Server 配置生效
+3. 在 OpenCode 中输入测试命令：
+```
+@genesis 列出所有工具
+```
+
+**Genesis 可用工具：**
+
+| 工具 | 命令示例 | 描述 |
+|------|----------|------|
+| `genesis_think` | `@genesis 分析这个目标：...` | 分析目标，创建执行计划 |
+| `agent_orchestrate` | `@genesis 编排任务...` | 编排多个 Agent 执行任务 |
+| `agent_monitor` | `@genesis 查看状态` | 监控 Agent 状态 |
+| `workflow_create` | `@genesis 创建工作流` | 创建可复用工作流 |
+| `genesis_tool_manage` | `@genesis 管理工具` | 管理 MCP 工具 |
+| `genesis_learn` | `@genesis 学习优化` | 自我学习和优化 |
+
+**使用示例：**
+```
+@genesis 采集卡塔尔活动日历 https://visitqatar.com/intl-en/events-calendar 的所有活动，翻译为中文，保存到本地
+```
+
+**使用 Genesis Agent：**
+```
+@genesis 采集卡塔尔活动日历 https://visitqatar.com/intl-en/events-calendar 的所有活动，翻译为中文，保存到本地
+```
+
+### 方式二：独立运行（可选）
 
 ```bash
 # 克隆仓库
@@ -29,7 +77,7 @@ cd Genesis
 # 安装依赖
 npm install
 
-# 启动基础设施（Redis + Weaviate）
+# 启动基础设施（Redis + Weaviate）- 可选
 docker-compose -f archive/v1/docker-compose.yml up -d
 
 # 构建共享包（必须）
@@ -44,6 +92,7 @@ npm run dev -w apps/frontend
 
 ### 访问
 
+- 🎨 OpenCode：使用 `@genesis` 命令调用 Agent
 - 🎨 前端仪表盘：http://localhost:3000
 - 🔌 后端 API：http://localhost:3002
 
