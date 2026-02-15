@@ -9,6 +9,11 @@ A Model Context Protocol (MCP) server for personal agent orchestration. Coordina
 - **SQLite Persistence**: Local database for workflows and execution history
 - **Cost Tracking**: Monitor token usage and execution costs
 - **Stdio Transport**: Zero-config setup with stdio communication
+- **Beautiful UI Visualization**: ANSI colors, gradients, box-drawing characters
+- **Task Execution Engine**: Parallel/serial execution with dependency management
+- **Research Task Planner**: Auto-detect research needs, plan web search queries
+- **Self-Analysis & Iteration**: Auto-analyze after execution, summarize issues, continuous optimization
+- **Real Market Data Collection**: Execute actual web searches for market research
 
 ## Installation
 
