@@ -59,14 +59,27 @@ Examples:
             },
             description: { type: 'string' },
             dependencies: { type: 'array', items: { type: 'string' } },
+            priority: { type: 'number', description: 'Task priority (1=highest, 10=lowest)' },
+            batchGroup: { type: 'string', description: 'Batch group ID for batch mode' },
           },
           required: ['id', 'agentType', 'description'],
         },
       },
+      mode: {
+        type: 'string',
+        enum: ['serial', 'parallel', 'batch', 'priority'],
+        default: 'parallel',
+        description: 'Execution mode: serial (sequential), parallel (simultaneous), batch (grouped), priority (by priority field)',
+      },
       parallel: {
         type: 'boolean',
         default: false,
-        description: 'Execute independent tasks in parallel',
+        description: '[Deprecated] Use mode instead',
+      },
+      batchSize: {
+        type: 'number',
+        default: 3,
+        description: 'Number of tasks per batch (for batch mode)',
       },
       timeout: {
         type: 'number',
@@ -101,12 +114,14 @@ Examples:
     return {
       status: 'pending',
       executionId,
-      message: `Created execution with ${tasks.length} tasks`,
+      message: `Created execution with ${tasks.length} tasks in ${parsed.mode || 'parallel'} mode`,
       tasks: tasks.map((t: any) => ({
         ...t,
         status: 'pending',
       })),
+      mode: parsed.mode || 'parallel',
       parallel: parsed.parallel,
+      batchSize: parsed.batchSize,
       timeout: parsed.timeout,
     };
   },

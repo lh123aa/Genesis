@@ -58,8 +58,10 @@ const colors = {
   yellow: '\x1b[33m',
   blue: '\x1b[34m',
   magenta: '\x1b[35m',
+  red: '\x1b[31m',
   dim: '\x1b[2m',
   bright: '\x1b[1m',
+  reset: '\x1b[0m',
 };
 
 // Simulated results for different task types
@@ -212,6 +214,8 @@ export async function executeWithVisualization(goal: string, options?: {
   autoExecute?: boolean;
   showThinking?: boolean;
   verbose?: boolean;
+  mode?: 'serial' | 'parallel' | 'batch' | 'priority';
+  batchSize?: number;
 }): Promise<{
   success: boolean;
   analysis: any;
@@ -317,14 +321,22 @@ export async function executeWithVisualization(goal: string, options?: {
   printKnowledge(kbRecs.map((k: any) => ({ title: k.title, content: k.content })));
   
   // ═══════════════════════════════════════════════════════════
-  // PHASE 9: Execute Tasks (if autoExecute) - PARALLEL MODE
+  // PHASE 9: Execute Tasks (if autoExecute) - Mode Selection
   // ═══════════════════════════════════════════════════════════
   let completedCount = 0;
   const completedResults = new Map<string, string>();
+  const executionMode = options?.mode || 'parallel';
   
   if (options?.autoExecute) {
     printExecutionHeader();
-    completedCount = await executeTasksParallel(tasks, goal, completedResults);
+    // 根据模式执行任务
+    completedCount = await executeTasksByMode(
+      tasks, 
+      goal, 
+      completedResults, 
+      executionMode,
+      { batchSize: options?.batchSize }
+    );
   } else {
     printExecutionProgress(0, tasks.length);
     console.log(`   ${colors.yellow}⏳${'\x1b[0m'} ${colors.dim}Execution pending - add --execute to run${'\x1b[0m'}`);
@@ -698,6 +710,202 @@ async function executeTasksParallel(
   
   // 执行完成后自动触发评估和升级检查
   await runPostTaskEvaluation(goal, completed, executionOrder.length);
+  
+  return completed;
+}
+
+// ============================================================================
+// Batch Execution Mode - 按批次执行任务
+// ============================================================================
+
+/**
+ * 批量执行模式
+ * 将任务分成批次，每批完成后等待，再执行下一批
+ */
+async function executeTasksBatch(
+  tasks: any[],
+  goal: string,
+  completedResults: Map<string, string>,
+  batchSize: number = 3
+): Promise<number> {
+  console.log(`\n${colors.yellow}📦 批量执行模式${colors.reset} - 每批 ${batchSize} 个任务\n`);
+  
+  // 按 batchGroup 分组，如果没有则按顺序分批
+  const batches: any[][] = [];
+  const batchGroups = new Map<string, any[]>();
+  
+  tasks.forEach(task => {
+    const group = task.batchGroup || 'default';
+    if (!batchGroups.has(group)) {
+      batchGroups.set(group, []);
+    }
+    batchGroups.get(group)!.push(task);
+  });
+  
+  // 合并所有批次
+  let currentBatch: any[] = [];
+  batchGroups.forEach((groupTasks) => {
+    groupTasks.forEach(task => {
+      currentBatch.push(task);
+      if (currentBatch.length >= batchSize) {
+        batches.push(currentBatch);
+        currentBatch = [];
+      }
+    });
+  });
+  if (currentBatch.length > 0) {
+    batches.push(currentBatch);
+  }
+  
+  let completed = 0;
+  
+  for (let i = 0; i < batches.length; i++) {
+    const batch = batches[i];
+    console.log(`${colors.cyan}━ Batch ${i + 1}/${batches.length} ━${colors.reset}`);
+    
+    // 并行执行当前批次
+    const batchPromises = batch.map(async (task) => {
+      try {
+        const result = await executeSingleTask(task, goal, tasks, completedResults);
+        completedResults.set(task.id, result);
+        return { success: true, taskId: task.id };
+      } catch (error) {
+        console.log(`   ${colors.red}✗ 任务失败: ${task.name}${colors.reset}`);
+        return { success: false, taskId: task.id };
+      }
+    });
+    
+    const results = await Promise.all(batchPromises);
+    completed += results.filter(r => r.success).length;
+    
+    // 批次间隔提示
+    if (i < batches.length - 1) {
+      console.log(`${colors.dim}   等待下一批...${colors.reset}\n`);
+      await new Promise(resolve => setTimeout(resolve, 500));
+    }
+  }
+  
+  console.log(`\n${colors.green}✓ 批量执行完成: ${completed}/${tasks.length} 任务${colors.reset}\n`);
+  return completed;
+}
+
+// ============================================================================
+// Priority Execution Mode - 按优先级执行任务
+// ============================================================================
+
+/**
+ * 优先级执行模式
+ * 按 priority 字段排序，数字越小优先级越高
+ */
+async function executeTasksPriority(
+  tasks: any[],
+  goal: string,
+  completedResults: Map<string, string>
+): Promise<number> {
+  console.log(`\n${colors.magenta}⭐ 优先级执行模式${colors.reset} - 按优先级顺序执行\n`);
+  
+  // 按优先级排序（1最高，10最低）
+  const sortedTasks = [...tasks].sort((a, b) => {
+    const priorityA = a.priority || 5;
+    const priorityB = b.priority || 5;
+    return priorityA - priorityB;
+  });
+  
+  // 打印优先级顺序
+  sortedTasks.forEach((task, idx) => {
+    const priority = task.priority || 5;
+    const priorityIcon = priority <= 2 ? '🔴' : priority <= 4 ? '🟡' : '🟢';
+    console.log(`   ${priorityIcon} 优先级${priority}: ${task.name}`);
+  });
+  console.log('');
+  
+  let completed = 0;
+  
+  for (const task of sortedTasks) {
+    // 检查依赖是否满足
+    if (task.dependencies && task.dependencies.length > 0) {
+      const depsMet = task.dependencies.every((depId: string) => completedResults.has(depId));
+      if (!depsMet) {
+        console.log(`   ${colors.yellow}⏳ 等待依赖: ${task.name}${colors.reset}`);
+        continue;
+      }
+    }
+    
+    try {
+      const result = await executeSingleTask(task, goal, sortedTasks, completedResults);
+      completedResults.set(task.id, result);
+      completed++;
+      console.log(`   ${colors.green}✓${colors.reset} 完成: ${task.name} (优先级${task.priority || 5})\n`);
+    } catch (error) {
+      console.log(`   ${colors.red}✗ 失败: ${task.name}${colors.reset}\n`);
+    }
+  }
+  
+  return completed;
+}
+
+// ============================================================================
+// Execution Mode Router - 执行模式路由
+// ============================================================================
+
+/**
+ * 根据模式选择执行策略
+ */
+async function executeTasksByMode(
+  tasks: any[],
+  goal: string,
+  completedResults: Map<string, string>,
+  mode: string,
+  options?: { batchSize?: number }
+): Promise<number> {
+  switch (mode) {
+    case 'serial':
+      console.log(`\n${colors.blue}📝 串行执行模式${colors.reset} - 逐个执行\n`);
+      return await executeTasksSerial(tasks, goal, completedResults);
+    
+    case 'parallel':
+      return await executeTasksParallel(tasks, goal, completedResults);
+    
+    case 'batch':
+      return await executeTasksBatch(tasks, goal, completedResults, options?.batchSize || 3);
+    
+    case 'priority':
+      return await executeTasksPriority(tasks, goal, completedResults);
+    
+    default:
+      console.log(`\n${colors.yellow}⚠️ 未知模式: ${mode}，默认使用并行模式${colors.reset}`);
+      return await executeTasksParallel(tasks, goal, completedResults);
+  }
+}
+
+/**
+ * 串行执行（兼容旧版）
+ */
+async function executeTasksSerial(
+  tasks: any[],
+  goal: string,
+  completedResults: Map<string, string>
+): Promise<number> {
+  let completed = 0;
+  
+  for (const task of tasks) {
+    // 检查依赖
+    if (task.dependencies && task.dependencies.length > 0) {
+      const depsMet = task.dependencies.every((depId: string) => completedResults.has(depId));
+      if (!depsMet) {
+        console.log(`   ${colors.yellow}⏳ 等待依赖: ${task.name}${colors.reset}`);
+        continue;
+      }
+    }
+    
+    try {
+      const result = await executeSingleTask(task, goal, tasks, completedResults);
+      completedResults.set(task.id, result);
+      completed++;
+    } catch (error) {
+      console.log(`   ${colors.red}✗ 失败: ${task.name}${colors.reset}`);
+    }
+  }
   
   return completed;
 }

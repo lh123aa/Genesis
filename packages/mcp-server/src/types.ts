@@ -1,6 +1,11 @@
 import { z } from 'zod';
 
 /**
+ * 执行模式类型
+ */
+export type ExecutionMode = 'serial' | 'parallel' | 'batch' | 'priority';
+
+/**
  * Tool definition interface
  */
 export interface Tool {
@@ -20,8 +25,12 @@ export const AgentOrchestrateSchema = z.object({
     agentType: z.enum(['scout', 'coder', 'tester', 'reviewer', 'docs']).describe('Type of agent'),
     description: z.string().describe('Task description'),
     dependencies: z.array(z.string()).optional().describe('Task IDs this depends on'),
+    priority: z.number().optional().describe('Task priority (1=highest, 10=lowest)'),
+    batchGroup: z.string().optional().describe('Batch group ID for batch mode'),
   })).optional().describe('Direct task definitions'),
-  parallel: z.boolean().default(false).describe('Execute tasks in parallel'),
+  mode: z.enum(['serial', 'parallel', 'batch', 'priority']).default('parallel').describe('Execution mode: serial, parallel, batch, or priority'),
+  parallel: z.boolean().default(false).describe('Execute tasks in parallel (deprecated, use mode)'),
+  batchSize: z.number().optional().describe('Number of tasks per batch (for batch mode)'),
   timeout: z.number().default(300000).describe('Timeout in milliseconds'),
 });
 
