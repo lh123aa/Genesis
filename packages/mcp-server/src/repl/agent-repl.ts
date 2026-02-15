@@ -311,7 +311,7 @@ export class AgentREPL {
     // Check if it's a simple task (auto-execute)
     const isSimple = goal.split(/\s+/).length <= 10 && !goal.includes('complex') && !goal.includes('system');
 
-    console.log('\n  🧠 Thinking about: ' + goal + '\n');
+    console.log('\n  🧠 正在思考: ' + goal + '\n');
 
     try {
       // Step 1: Analyze

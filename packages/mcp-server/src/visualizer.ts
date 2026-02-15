@@ -359,10 +359,10 @@ export function printSummaryReport(results: {
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
   
   // Tasks
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}Total Tasks:${colors.reset}    ${colors.white}${results.totalTasks}${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.green}Completed:${colors.reset}     ${colors.green}${results.completedTasks}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}总任务数:${colors.reset}    ${colors.white}${results.totalTasks}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.green}已完成:${colors.reset}     ${colors.green}${results.completedTasks}${colors.reset}`);
   if (results.failedTasks > 0) {
-    console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.red}Failed:${colors.reset}        ${colors.red}${results.failedTasks}${colors.reset}`);
+    console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.red}失败:${colors.reset}        ${colors.red}${results.failedTasks}${colors.reset}`);
   }
   
   // Duration
@@ -384,10 +384,10 @@ export function printSummaryReport(results: {
   // Success message
   if (results.success) {
     console.log('');
-    console.log(`   ${colors.green}✓ All tasks completed successfully!${colors.reset}`);
+    console.log(`   ${colors.green}✓ 所有任务已完成!${colors.reset}`);
   } else {
     console.log('');
-    console.log(`   ${colors.red}✗ Some tasks failed. Check logs for details.${colors.reset}`);
+    console.log(`   ${colors.red}✗ 部分任务失败，请查看日志了解详情。${colors.reset}`);
   }
   
   console.log('');

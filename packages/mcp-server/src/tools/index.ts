@@ -18,6 +18,7 @@ import { learningEngine } from '../learning/engine.js';
 import { optimizer } from '../learning/optimizer.js';
 import { knowledgeBase } from '../learning/knowledge.js';
 import { requirementGatherer, type ClarifyingQuestion, type RequirementSummary } from '../agents/requirement-gatherer.js';
+import { selfEvaluationEngine, type SystemEvaluationReport, type EvaluationDimension } from '../learning/self-evaluation.js';
 
 /**
  * Tool: agent_orchestrate
@@ -1169,6 +1170,98 @@ const genesisConfirmExecute: Tool = {
 };
 
 /**
+ * Tool: genesis_self_evaluate
+ * 
+ * 自我评估系统 - Genesis 定期评估自身表现
+ */
+const genesisSelfEvaluate: Tool = {
+  name: 'genesis_self_evaluate',
+  description: `对 Genesis 系统进行全面自我评估。
+
+评估维度包括：
+- 功能完整性: 检查工具和功能是否正常
+- 性能: 评估执行时间和效率
+- 用户满意度: 分析用户反馈
+- 代码质量: 检查代码结构和规范
+- 学习能力: 评估从历史任务中学习的能力
+- 可靠性: 评估任务成功率
+- 可维护性: 评估系统可维护性
+
+返回详细的评估报告和改进步骤。`,
+  inputSchema: {
+    type: 'object',
+    properties: {
+      dimension: {
+        type: 'string',
+        enum: ['functionality', 'performance', 'user_satisfaction', 'code_quality', 'learning', 'reliability', 'maintainability', 'full'],
+        description: '评估维度，full 表示完整评估',
+      },
+      showHistory: {
+        type: 'boolean',
+        default: false,
+        description: '是否显示评估历史',
+      },
+    },
+  },
+  handler: async (args) => {
+    const { dimension, showHistory } = args as { dimension?: string; showHistory?: boolean };
+
+    console.log('\n🧠 Genesis 开始自我评估...\n');
+
+    let report: SystemEvaluationReport | null = null;
+
+    if (dimension && dimension !== 'full') {
+      // 单维度评估
+      const result = await selfEvaluationEngine.runEvaluation(dimension as EvaluationDimension);
+      report = {
+        overallScore: result.score,
+        overallLevel: result.level,
+        dimensions: [result],
+        trends: {},
+        topStrengths: result.score >= 80 ? [`${dimension} (${result.score}分)`] : [],
+        topIssues: result.score < 70 ? [`${dimension} (${result.score}分)`] : [],
+        improvementPlan: result.recommendations,
+        lastEvaluation: result.timestamp,
+        evaluationCount: 1,
+      };
+    } else {
+      // 完整评估
+      report = await selfEvaluationEngine.runFullEvaluation();
+    }
+
+    // 打印报告
+    if (report) {
+      selfEvaluationEngine.printReport(report);
+    }
+
+    // 显示历史
+    if (showHistory) {
+      const history = selfEvaluationEngine.getHistory();
+      if (history.length > 0) {
+        console.log(`\n📜 评估历史 (共 ${history.length} 次):\n`);
+        history.forEach((h, i) => {
+          const scoreColor = h.overallScore >= 80 ? '🟢' : h.overallScore >= 60 ? '🟡' : '🔴';
+          console.log(`  ${i + 1}. ${scoreColor} ${h.overallScore}分 - ${new Date(h.lastEvaluation).toLocaleDateString('zh-CN')}`);
+        });
+        console.log('');
+      }
+    }
+
+    return {
+      status: 'success',
+      report: report ? {
+        overallScore: report.overallScore,
+        overallLevel: report.overallLevel,
+        topStrengths: report.topStrengths,
+        topIssues: report.topIssues,
+        improvementPlan: report.improvementPlan.slice(0, 5),
+      } : null,
+      message: '评估完成',
+    };
+  },
+};
+
+/**
  * Export all tools
  */
 export const tools: Tool[] = [
@@ -1178,6 +1271,7 @@ export const tools: Tool[] = [
   genesisThink,
   genesisAnswerQuestion,
   genesisConfirmExecute,
+  genesisSelfEvaluate,
   genesisToolManage,
   genesisLearn,
 ];

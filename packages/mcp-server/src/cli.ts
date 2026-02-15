@@ -122,11 +122,11 @@ function showHelp(): void {
    npx tsx src/cli.ts "Research best practices for React state management"
 
  Features:
-   🎯 Smart task decomposition
-   🔍 Agent assignment visualization  
-   💭 Thinking process display
-   📊 Progress tracking
-   🎉 Beautiful execution summary
+    🎯 智能任务分解
+    🔍 Agent 分配可视化  
+    💭 思考过程展示
+    📊 进度追踪
+    🎉 精美执行总结
 
  In REPL mode:
    Just type naturally what you want to do!
