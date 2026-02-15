@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>卡塔尔2026电商市场蓝海赛道分析</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --color-primary: #00d4ff;
+      --color-secondary: #7c3aed;
+      --color-background: #0a0b0f;
+      --color-surface: rgba(15, 23, 42, 0.8);
+      --color-surface-hover: rgba(30, 41, 59, 0.9);
+      --color-border: rgba(0, 212, 255, 0.2);
+      --color-text: #f1f5f9;
+      --color-text-dim: #94a3b8;
+      --color-success: #10b981;
+      --color-warning: #f59e0b;
+      --color-danger: #ef4444;
+      --gradient-primary: linear-gradient(135deg, #00d4ff 0%, #7c3aed 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--color-background);
+      color: var(--color-text);
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    /* Background Pattern */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: 
+        radial-gradient(ellipse at 20% 20%, rgba(0, 212, 255, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(124, 58, 237, 0.08) 0%, transparent 50%),
+        linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      margin-bottom: 60px;
+      padding: 60px 0;
+      position: relative;
+    }
+
+    .header::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 200px;
+      height: 2px;
+      background: var(--gradient-primary);
+    }
+
+    .header h1 {
+      font-size: 3rem;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 16px;
+      letter-spacing: -0.02em;
+    }
+
+    .header .subtitle {
+      font-size: 1.25rem;
+      color: var(--color-text-dim);
+      margin-bottom: 24px;
+    }
+
+    .header .meta {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      font-size: 0.875rem;
+      color: var(--color-text-dim);
+    }
+
+    .header .meta span {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* Cards */
+    .card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 32px;
+      backdrop-filter: blur(12px);
+      transition: all 0.3s ease;
+    }
+
+    .card:hover {
+      border-color: var(--color-primary);
+      box-shadow: 0 0 30px rgba(0, 212, 255, 0.1);
+    }
+
+    .card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .card-title .icon {
+      font-size: 1.75rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--color-surface-hover);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      border: 1px solid var(--color-border);
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--color-primary);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      background: var(--gradient-primary);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      color: var(--color-text-dim);
+      font-size: 0.875rem;
+      margin-top: 8px;
+    }
+
+    /* Tables */
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 0 -32px;
+      padding: 0 32px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9375rem;
+    }
+
+    th, td {
+      padding: 16px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    th {
+      background: rgba(0, 212, 255, 0.05);
+      color: var(--color-primary);
+      font-weight: 600;
+      font-size: 0.8125rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    tr:hover {
+      background: rgba(0, 212, 255, 0.03);
+    }
+
+    /* Rank badges */
+    .rank {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.875rem;
+    }
+
+    .rank-1 { background: linear-gradient(135deg, #ffd700, #ffb700); color: #000; }
+    .rank-2 { background: linear-gradient(135deg, #c0c0c0, #a0a0a0); color: #000; }
+    .rank-3 { background: linear-gradient(135deg, #cd7f32, #b87333); color: #000; }
+    .rank-n { background: var(--color-surface-hover); color: var(--color-text-dim); }
+
+    /* Tags */
+    .tag {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+    }
+
+    .tag-high { background: rgba(16, 185, 129, 0.2); color: var(--color-success); }
+    .tag-medium { background: rgba(245, 158, 11, 0.2); color: var(--color-warning); }
+    .tag-low { background: rgba(0, 212, 255, 0.2); color: var(--color-primary); }
+
+    /* Opportunity Cards */
+    .opportunity-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .opportunity-card {
+      background: var(--color-surface-hover);
+      border: 1px solid var(--color-border);
+      border-radius: 16px;
+      padding: 28px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .opportunity-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--gradient-primary);
+    }
+
+    .opportunity-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--color-primary);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    }
+
+    .opportunity-card .rank-badge {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+    }
+
+    .opportunity-card h3 {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 12px;
+      color: var(--color-text);
+    }
+
+    .opportunity-card .analysis {
+      color: var(--color-text-dim);
+      font-size: 0.875rem;
+      margin-bottom: 16px;
+      line-height: 1.7;
+    }
+
+    .opportunity-card .metrics {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .metric {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8125rem;
+      color: var(--color-text-dim);
+    }
+
+    /* Two Column Layout */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
+
+    @media (max-width: 900px) {
+      .two-col { grid-template-columns: 1fr; }
+    }
+
+    /* Lists */
+    .list {
+      list-style: none;
+    }
+
+    .list li {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--color-border);
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .list li:last-child { border-bottom: none; }
+
+    .list .bullet {
+      color: var(--color-primary);
+      font-weight: 600;
+    }
+
+    /* Section divider */
+    .section {
+      margin: 60px 0;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .section-title .number {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 48px;
+      height: 48px;
+      background: var(--gradient-primary);
+      border-radius: 12px;
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #000;
+    }
+
+    /* Risk Cards */
+    .risk-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .risk-card {
+      background: var(--color-surface-hover);
+      border-radius: 12px;
+      padding: 20px;
+      border-left: 4px solid var(--color-warning);
+    }
+
+    .risk-card .risk-type {
+      font-weight: 600;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .risk-card .risk-detail {
+      color: var(--color-text-dim);
+      font-size: 0.875rem;
+    }
+
+    /* Recommendation Cards */
+    .rec-section {
+      margin-top: 40px;
+    }
+
+    .rec-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+      gap: 24px;
+    }
+
+    .rec-card {
+      background: var(--color-surface-hover);
+      border-radius: 16px;
+      padding: 28px;
+      border: 1px solid var(--color-border);
+    }
+
+    .rec-card.tier-1 {
+      border-color: var(--color-success);
+      background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), transparent);
+    }
+
+    .rec-card h4 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .rec-card .products {
+      margin-top: 16px;
+    }
+
+    .rec-card .product-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    .rec-card .product-item:last-child { border-bottom: none; }
+
+    /* Footer */
+    .footer {
+      text-align: center;
+      padding: 40px;
+      margin-top: 60px;
+      border-top: 1px solid var(--color-border);
+      color: var(--color-text-dim);
+      font-size: 0.875rem;
+    }
+
+    .footer a {
+      color: var(--color-primary);
+      text-decoration: none;
+    }
+
+    .footer a:hover {
+      text-decoration: underline;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .card, .stat-card, .opportunity-card {
+      animation: fadeIn 0.6s ease forwards;
+    }
+
+    .opportunity-card:nth-child(1) { animation-delay: 0.1s; }
+    .opportunity-card:nth-child(2) { animation-delay: 0.15s; }
+    .opportunity-card:nth-child(3) { animation-delay: 0.2s; }
+    .opportunity-card:nth-child(4) { animation-delay: 0.25s; }
+    .opportunity-card:nth-child(5) { animation-delay: 0.3s; }
+    .opportunity-card:nth-child(6) { animation-delay: 0.35s; }
+
+    /* Code style for data */
+    .code {
+      font-family: 'JetBrains Mono', monospace;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 0.875em;
+    }
+
+    /* Emoji fixes */
+    .emoji { font-size: 1.1em; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <h1>🏝️ 卡塔尔2026电商市场蓝海赛道分析</h1>
+      <p class="subtitle">Qatar E-Commerce Market Blue Ocean Opportunities Analysis</p>
+      <div class="meta">
+        <span>📅 生成日期: 2026年2月15日</span>
+        <span>📊 数据来源: Mordor Intelligence, Technavio, IMF</span>
+      </div>
+    </header>
+
+    <!-- Market Overview -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">1</span>
+        📈 市场规模概览
+      </h2>
+      
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value">$49.6B</div>
+          <div class="stat-label">2026年电商市场规模</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$79.4B</div>
+          <div class="stat-label">2029年预测市场规模</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">9.31%</div>
+          <div class="stat-label">年复合增长率 (CAGR)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">15-20%</div>
+          <div class="stat-label">电商渗透率</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$45B</div>
+          <div class="stat-label">跨境电商规模</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value">$84,000+</div>
+          <div class="stat-label">人均GDP (全球最高)</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 class="card-title"><span class="icon">🚀</span> 市场增长驱动因素</h3>
+        <ul class="list">
+          <li><span class="bullet">▸</span> 移动互联网普及率持续提升</li>
+          <li><span class="bullet">▸</span> 数字化支付基础设施完善</li>
+          <li><span class="bullet">▸</span> 消费者对线上购物偏好增强</li>
+          <li><span class="bullet">▸</span> 全渠道零售策略兴起</li>
+          <li><span class="bullet">▸</span> 2026年亚运会带来消费热潮</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- Blue Ocean Opportunities -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">2</span>
+        💎 蓝海赛道 TOP 12
+      </h2>
+
+      <div class="opportunity-grid">
+        <!-- Rank 1-5: Top -->
+        <div class="opportunity-card">
+          <span class="rank rank-1 rank-badge">#1</span>
+          <h3>🏠 智能家居设备</h3>
+          <p class="analysis">Vision 2030智慧城市推动，物联网普及。政策支持+技术成熟+利润高，是最佳切入品类。</p>
+          <div class="metrics">
+            <span class="metric">⬜ 竞争程度: 低</span>
+            <span class="metric">💰💰💰💰 预期回报: 高</span>
+            <span class="metric">🟢 风险等级: 低</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-2 rank-badge">#2</span>
+          <h3>💪 健身运动装备</h3>
+          <p class="analysis">2026亚运会+健康意识提升。亚运红利窗口期，健身热潮带动相关消费。</p>
+          <div class="metrics">
+            <span class="metric">⬜ 竞争程度: 低</span>
+            <span class="metric">💰💰💰💰 预期回报: 高</span>
+            <span class="metric">🟢 风险等级: 低</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-3 rank-badge">#3</span>
+          <h3>👶 母婴用品</h3>
+          <p class="analysis">高收入家庭多生育，进口依赖度高。竞争极低、复购率高、客单价高的优质赛道。</p>
+          <div class="metrics">
+            <span class="metric">⬜⬜ 竞争程度: 极低</span>
+            <span class="metric">💰💰💰💰 预期回报: 很高</span>
+            <span class="metric">🟢 风险等级: 低</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-n rank-badge">#4</span>
+          <h3>💎 定制珠宝首饰</h3>
+          <p class="analysis">高端消费人群，追求个性化。高端利润丰厚，但需注意选品和供应链。</p>
+          <div class="metrics">
+            <span class="metric">⬜ 竞争程度: 低</span>
+            <span class="metric">💰💰💰💰 预期回报: 很高</span>
+            <span class="metric">🟡 风险等级: 中</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-n rank-badge">#5</span>
+          <h3>🐾 宠物用品</h3>
+          <p class="analysis">养宠家庭增加，市场几乎空白。细分市场，增长速度快，竞争极低。</p>
+          <div class="metrics">
+            <span class="metric">⬜⬜ 竞争程度: 极低</span>
+            <span class="metric">💰💰💰 预期回报: 中高</span>
+            <span class="metric">🟢 风险等级: 低</span>
+          </div>
+        </div>
+
+        <!-- Rank 6-12: High Potential -->
+        <div class="opportunity-card">
+          <span class="rank rank-n rank-badge">#6</span>
+          <h3>🛋️ 家居装饰/设计师家具</h3>
+          <p class="analysis">房产热潮带动装修需求。配合线下体验可建立竞争壁垒。</p>
+          <div class="metrics">
+            <span class="metric">⬜⬜ 竞争程度: 中低</span>
+            <span class="metric">💰💰💰💰 预期回报: 高</span>
+            <span class="metric">🟢 风险等级: 低</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-n rank-badge">#7</span>
+          <h3>🥗 有机/清真食品</h3>
+          <p class="analysis">健康饮食+宗教文化需求。双重需求支撑，市场稳定增长。</p>
+          <div class="metrics">
+            <span class="metric">⬜ 竞争程度: 低</span>
+            <span class="metric">💰💰💰 预期回报: 中高</span>
+            <span class="metric">🟢 风险等级: 低</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-n rank-badge">#8</span>
+          <h3>📚 在线教育产品</h3>
+          <p class="analysis">数字化教育需求增长。疫情后线上教育已成为常态需求。</p>
+          <div class="metrics">
+            <span class="metric">⬜ 竞争程度: 低</span>
+            <span class="metric">💰💰💰💰 预期回报: 高</span>
+            <span class="metric">🟢 风险等级: 低</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-n rank-badge">#9</span>
+          <h3>👴 老年人健康产品</h3>
+          <p class="analysis">人口老龄化趋势显现。护理器械、健康监测设备需求增长。</p>
+          <div class="metrics">
+            <span class="metric">⬜⬜ 竞争程度: 极低</span>
+            <span class="metric">💰💰💰 预期回报: 中高</span>
+            <span class="metric">🟢 风险等级: 低</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-n rank-badge">#10</span>
+          <h3>🗣️ 阿拉伯语本地化服务</h3>
+          <p class="分析">语言服务缺口巨大。不仅是翻译，更是文化适配和本地化运营。</p>
+          <div class="metrics">
+            <span class="metric">⬜⬜ 竞争程度: 极低</span>
+            <span class="metric">💰💰💰💰 预期回报: 高</span>
+            <span class="metric">🟢 风险等级: 低</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-n rank-badge">#11</span>
+          <h3>🌐 跨境电商解决方案</h3>
+          <p class="analysis">物流/支付服务需求。为其他卖家提供服务，商业模式稳健。</p>
+          <div class="metrics">
+            <span class="metric">⬜ 竞争程度: 低</span>
+            <span class="metric">💰💰💰 预期回报: 高</span>
+            <span class="metric">🟡 风险等级: 中</span>
+          </div>
+        </div>
+
+        <div class="opportunity-card">
+          <span class="rank rank-n rank-badge">#12</span>
+          <h3>🚗 新能源汽车配件</h3>
+          <p class="analysis">电动化转型初期。卡塔尔推进电动汽车普及，相关配件需求上升。</p>
+          <div class="metrics">
+            <span class="metric">⬜⬜ 竞争程度: 极低</span>
+            <span class="metric">💰💰💰💰 预期回报: 高</span>
+            <span class="metric">🟡 风险等级: 中</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Consumer Profile -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">3</span>
+        👥 消费者画像
+      </h2>
+
+      <div class="two-col">
+        <div class="card">
+          <h3 class="card-title"><span class="icon">👨‍👩‍👧</span> 人口特征</h3>
+          <table>
+            <tr><td>总人口</td><td><span class="code">~290万</span></td></tr>
+            <tr><td>外籍人口占比</td><td><span class="code">~85%</span></td></tr>
+            <tr><td>35岁以下人口</td><td><span class="code">~60%</span></td></tr>
+            <tr><td>人均GDP</td><td><span class="code">$84,000+</span></td></tr>
+          </table>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title"><span class="icon">🛒</span> 消费行为</h3>
+          <table>
+            <tr><td>收入水平</td><td>全球最高，消费能力强</td></tr>
+            <tr><td>数字化程度</td><td>极高，互联网渗透率高</td></tr>
+            <tr><td>购物高峰</td><td>21:00-23:00 (夜间)</td></tr>
+            <tr><td>设备偏好</td><td>移动端为主 (Mobile First)</td></tr>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Risks -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">4</span>
+        ⚠️ 风险与挑战
+      </h2>
+
+      <div class="risk-grid">
+        <div class="risk-card">
+          <div class="risk-type">🛡️ 安全风险</div>
+          <div class="risk-detail">网络安全威胁增加。获得安全认证，数据加密是必要条件。</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-type">🚚 物流挑战</div>
+          <div class="risk-detail">最后一公里成本高。建立本地仓储网络可有效降低成本。</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-type">🏛️ 法规风险</div>
+          <div class="risk-detail">GDPR-like隐私法出台。合规运营，本地化数据存储。</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-type">💱 支付风险</div>
+          <div class="risk-detail">拒付和欺诈问题。3D Secure，风控系统是必备。</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-type">🌊 竞争风险</div>
+          <div class="risk-detail">国际巨头挤压。差异化定位，本地服务是关键。</div>
+        </div>
+        <div class="risk-card">
+          <div class="risk-type">📦 供应链</div>
+          <div class="risk-detail">依赖进口。多元化供应商，建立安全库存是必要的。</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Recommendations -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">5</span>
+        💡 创业建议
+      </h2>
+
+      <div class="rec-section">
+        <h3 style="margin-bottom: 20px; color: var(--color-text-dim);">🥇 第一梯队 - 立即行动</h3>
+        <div class="rec-grid">
+          <div class="rec-card tier-1">
+            <h4>🏠 智能家居设备</h4>
+            <p style="color: var(--color-text-dim); font-size: 0.9rem;">切入品类: 智能照明、智能安防、语音助手</p>
+            <p style="color: var(--color-text-dim); font-size: 0.9rem; margin-top: 8px;">优势: 政策支持+技术成熟+利润高</p>
+            <p style="color: var(--color-primary); font-size: 0.85rem; margin-top: 12px;">建议: 与本地集成商合作</p>
+          </div>
+          <div class="rec-card tier-1">
+            <h4>👶 母婴用品</h4>
+            <p style="color: var(--color-text-dim); font-size: 0.9rem;">切入品类: 婴儿食品、童装、玩具</p>
+            <p style="color: var(--color-text-dim); font-size: 0.9rem; margin-top: 8px;">优势: 竞争极低、复购率高、客单价高</p>
+            <p style="color: var(--color-primary); font-size: 0.85rem; margin-top: 12px;">建议: 专注高端有机品牌</p>
+          </div>
+          <div class="rec-card tier-1">
+            <h4>💪 健身运动装备</h4>
+            <p style="color: var(--color-text-dim); font-size: 0.9rem;">切入品类: 家用健身器材、运动服饰、智能手环</p>
+            <p style="color: var(--color-text-dim); font-size: 0.9rem; margin-top: 8px;">优势: 亚运红利、健康意识提升</p>
+            <p style="color: var(--color-primary); font-size: 0.85rem; margin-top: 12px;">建议: 结合线下健身房合作</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="rec-section">
+        <h3 style="margin-bottom: 20px; color: var(--color-text-dim);">🥈 第二梯队 - 战略布局</h3>
+        <div class="rec-grid">
+          <div class="rec-card">
+            <h4>🐾 宠物用品</h4>
+            <p style="color: var(--color-text-dim); font-size: 0.9rem;">市场规模小但增长快，适合细分切入</p>
+          </div>
+          <div class="rec-card">
+            <h4>👴 老年健康产品</h4>
+            <p style="color: var(--color-text-dim); font-size: 0.9rem;">人口结构变化带来的长期机会</p>
+          </div>
+          <div class="rec-card">
+            <h4>🥗 有机清真食品</h4>
+            <p style="color: var(--color-text-dim); font-size: 0.9rem;">健康+宗教双重需求，市场稳定</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Success Factors -->
+    <section class="section">
+      <h2 class="section-title">
+        <span class="number">6</span>
+        ✅ 关键成功因素
+      </h2>
+
+      <div class="card">
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: 2rem;">✅</div>
+            <div class="stat-label">阿拉伯语本地化</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: 2rem;">✅</div>
+            <div class="stat-label">本地支付 (Mada, Knet)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: 2rem;">✅</div>
+            <div class="stat-label">快速配送 (当日达)</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: 2rem;">✅</div>
+            <div class="stat-label">社交媒体营销</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: 2rem;">✅</div>
+            <div class="stat-label">网红合作</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" style="font-size: 2rem;">✅</div>
+            <div class="stat-label">退货便利政策</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>📊 数据来源: Mordor Intelligence, Technavio, Research and Markets, DataReportal, IMF, Fitch Solutions</p>
+      <p style="margin-top: 12px;">🔗 <a href="https://www.mordorintelligence.com/industry-reports/qatar-ecommerce-market">Qatar E-Commerce Market - Mordor Intelligence</a></p>
+      <p style="margin-top: 24px; opacity: 0.6;">Generated by Genesis Agent System | 2026年2月15日</p>
+    </footer>
+  </div>
+</body>
+</html>
