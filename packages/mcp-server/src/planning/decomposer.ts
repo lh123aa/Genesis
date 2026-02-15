@@ -14,7 +14,7 @@ export interface TaskNode {
   id: string;
   name: string;
   description: string;
-  agentType: 'scout' | 'coder' | 'tester' | 'reviewer' | 'docs';
+  agentType: 'scout' | 'coder' | 'tester' | 'reviewer' | 'docs' | 'librarian' | 'oracle' | 'builder' | 'optimizer' | 'integrator';
   estimatedDuration: number; // in minutes
   dependencies: string[]; // IDs of tasks that must complete before this one
   subtasks?: TaskNode[]; // For recursive decomposition

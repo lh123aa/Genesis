@@ -25,7 +25,7 @@ export interface WorkflowDefinition {
 
 export interface WorkflowTask {
   id: string;
-  agentType: 'scout' | 'coder' | 'tester' | 'reviewer' | 'docs';
+  agentType: 'scout' | 'coder' | 'tester' | 'reviewer' | 'docs' | 'librarian' | 'oracle' | 'builder' | 'optimizer' | 'integrator';
   description: string;
   template: string;
   dependencies?: string[];
@@ -465,7 +465,7 @@ export class WorkflowGenerator {
       }
 
       // Validate agent type
-      const validTypes = ['scout', 'coder', 'tester', 'reviewer', 'docs'];
+      const validTypes = ['scout', 'coder', 'tester', 'reviewer', 'docs', 'librarian', 'oracle', 'builder', 'optimizer', 'integrator'];
       if (!validTypes.includes(task.agentType)) {
         errors.push(`Task "${task.id}" has invalid agent type "${task.agentType}"`);
       }

@@ -606,9 +606,9 @@ async function executeTasksParallel(
   // Timeline events
   const timeline: Array<{ timestamp: number; agent: string; event: string; detail?: string }> = [];
   
-  // Initialize agent states
+  // Initialize agent states (扩展支持 10 种 Agent)
   const agentStates: Map<string, AgentState> = new Map();
-  const agentTypes = ['scout', 'coder', 'tester', 'reviewer', 'docs'];
+  const agentTypes = ['scout', 'coder', 'tester', 'reviewer', 'docs', 'librarian', 'oracle', 'builder', 'optimizer', 'integrator'];
   
   // Build execution graph
   const taskGraph = new Map<string, string[]>(); // task -> tasks that depend on it
@@ -629,15 +629,21 @@ async function executeTasksParallel(
     t.dependencies && t.dependencies.length > 0
   ).map(t => t.id));
   
-  // Initialize agents
+  // Initialize agents (扩展支持 10 种 Agent)
   agentTypes.forEach(type => {
-    const config = {
+    const configMap: Record<string, { emoji: string; color: string }> = {
       scout: { emoji: '🔍', color: colors.cyan },
       coder: { emoji: '💻', color: colors.green },
       tester: { emoji: '🧪', color: colors.blue },
       reviewer: { emoji: '👀', color: colors.yellow },
       docs: { emoji: '📝', color: colors.magenta },
-    }[type] as any;
+      librarian: { emoji: '📚', color: '\x1b[38;2;168;85;247m' },
+      oracle: { emoji: '🔮', color: '\x1b[38;2;234;179;8m' },
+      builder: { emoji: '🏗️', color: '\x1b[38;2;249;115;22m' },
+      optimizer: { emoji: '⚡', color: '\x1b[38;2;239;68;68m' },
+      integrator: { emoji: '🔗', color: '\x1b[38;2;20;184;166m' },
+    };
+    const config = configMap[type] || { emoji: '🤖', color: colors.dim };
     
     agentStates.set(type, {
       id: type,

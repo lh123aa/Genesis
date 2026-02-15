@@ -7,7 +7,7 @@
 
 import readline from 'readline';
 import { plannerAgent } from '../agents/planner.js';
-import { agentRegistry } from '../agents/registry.js';
+import { enhancedAgentRegistry } from '../agents/enhanced-registry.js';
 import { taskDecomposer } from '../planning/decomposer.js';
 import { workflowGenerator } from '../planning/workflow-generator.js';
 import { toolDetector } from '../tools/detector.js';
@@ -575,7 +575,7 @@ Or type "/help" for available commands.`);
     console.log(`${this.gold}╠${border.replace(/./g, '─').substring(0, width - 4)}╣${this.reset}`);
     
     console.log(`${this.gold}║  ${this.cyan}▸${this.reset} ${this.white}Available Agents${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
-    const agents = agentRegistry.listAvailableAgents();
+    const agents = enhancedAgentRegistry.listAvailableAgents();
     agents.forEach(agent => {
       console.log(`${this.gold}║     ${this.gold}●${this.reset} ${this.white}${agent.name}${this.reset}: ${this.gray}${agent.description.substring(0, 45)}...${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
     });

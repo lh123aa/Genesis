@@ -31,7 +31,7 @@ const agentOrchestrate: Tool = {
 
 Use this tool when you need to:
 - Break down complex tasks into parallel subtasks
-- Coordinate multiple agents (scout, coder, tester, reviewer, docs)
+- Coordinate multiple agents (scout, coder, tester, reviewer, docs, librarian, oracle, builder, optimizer, integrator)
 - Execute multi-step workflows with dependencies
 - Manage long-running agent processes
 
@@ -55,7 +55,7 @@ Examples:
             id: { type: 'string' },
             agentType: { 
               type: 'string', 
-              enum: ['scout', 'coder', 'tester', 'reviewer', 'docs'],
+              enum: ['scout', 'coder', 'tester', 'reviewer', 'docs', 'librarian', 'oracle', 'builder', 'optimizer', 'integrator'],
             },
             description: { type: 'string' },
             dependencies: { type: 'array', items: { type: 'string' } },
@@ -224,7 +224,7 @@ The workflow will be saved and can be referenced by its ID in agent_orchestrate.
             id: { type: 'string' },
             agentType: { 
               type: 'string', 
-              enum: ['scout', 'coder', 'tester', 'reviewer', 'docs'],
+              enum: ['scout', 'coder', 'tester', 'reviewer', 'docs', 'librarian', 'oracle', 'builder', 'optimizer', 'integrator'],
             },
             description: { type: 'string' },
             template: { type: 'string' },

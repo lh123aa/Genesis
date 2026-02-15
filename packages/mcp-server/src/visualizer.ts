@@ -45,13 +45,20 @@ const colors = {
   }
 };
 
-// Agent type emojis and colors - 每个 Agent 有专属颜色
+// Agent type emojis and colors - 扩展支持 10 种 Agent
 const agentConfig = {
+  // 基础 Agent (5个)
   scout: { emoji: '🔍', color: colors.cyan, name: 'Scout', role: '研究探索', borderColor: '\x1b[38;2;0;212;255m' },
   coder: { emoji: '💻', color: colors.green, name: 'Coder', role: '代码实现', borderColor: '\x1b[38;2;16;185;129m' },
   tester: { emoji: '🧪', color: colors.blue, name: 'Tester', role: '测试验证', borderColor: '\x1b[38;2;59;130;246m' },
   reviewer: { emoji: '👀', color: colors.yellow, name: 'Reviewer', role: '代码评审', borderColor: '\x1b[38;2;245;158;11m' },
   docs: { emoji: '📝', color: colors.magenta, name: 'Docs', role: '文档编写', borderColor: '\x1b[38;2;139;92;246m' },
+  // 扩展 Agent (5个)
+  librarian: { emoji: '📚', color: '\x1b[38;2;168;85;247m', name: 'Librarian', role: '知识管理', borderColor: '\x1b[38;2;168;85;247m' },
+  oracle: { emoji: '🔮', color: '\x1b[38;2;234;179;8m', name: 'Oracle', role: '架构顾问', borderColor: '\x1b[38;2;234;179;8m' },
+  builder: { emoji: '🏗️', color: '\x1b[38;2;249;115;22m', name: 'Builder', role: '构建部署', borderColor: '\x1b[38;2;249;115;22m' },
+  optimizer: { emoji: '⚡', color: '\x1b[38;2;239;68;68m', name: 'Optimizer', role: '性能优化', borderColor: '\x1b[38;2;239;68;68m' },
+  integrator: { emoji: '🔗', color: '\x1b[38;2;20;184;166m', name: 'Integrator', role: '集成协调', borderColor: '\x1b[38;2;20;184;166m' },
 };
 
 // Status icons

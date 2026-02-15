@@ -22,7 +22,7 @@ export const AgentOrchestrateSchema = z.object({
   workflowId: z.string().optional().describe('Predefined workflow ID to use'),
   tasks: z.array(z.object({
     id: z.string().describe('Task identifier'),
-    agentType: z.enum(['scout', 'coder', 'tester', 'reviewer', 'docs']).describe('Type of agent'),
+    agentType: z.enum(['scout', 'coder', 'tester', 'reviewer', 'docs', 'librarian', 'oracle', 'builder', 'optimizer', 'integrator']).describe('Type of agent'),
     description: z.string().describe('Task description'),
     dependencies: z.array(z.string()).optional().describe('Task IDs this depends on'),
     priority: z.number().optional().describe('Task priority (1=highest, 10=lowest)'),
@@ -55,7 +55,7 @@ export const WorkflowCreateSchema = z.object({
   description: z.string().describe('Workflow description'),
   tasks: z.array(z.object({
     id: z.string().describe('Task ID'),
-    agentType: z.enum(['scout', 'coder', 'tester', 'reviewer', 'docs']),
+    agentType: z.enum(['scout', 'coder', 'tester', 'reviewer', 'docs', 'librarian', 'oracle', 'builder', 'optimizer', 'integrator']),
     description: z.string(),
     template: z.string().describe('Task template with placeholders'),
   })).describe('Task templates'),
@@ -150,7 +150,7 @@ export interface TaskNode {
   id: string;
   name: string;
   description: string;
-  agentType: 'scout' | 'coder' | 'tester' | 'reviewer' | 'docs';
+  agentType: 'scout' | 'coder' | 'tester' | 'reviewer' | 'docs' | 'librarian' | 'oracle' | 'builder' | 'optimizer' | 'integrator';
   estimatedDuration: number;
   dependencies: string[];
   subtasks?: TaskNode[];
@@ -177,7 +177,7 @@ export interface AgentCapability {
 export interface AgentDefinition {
   id: string;
   name: string;
-  type: 'scout' | 'coder' | 'tester' | 'reviewer' | 'docs';
+  type: 'scout' | 'coder' | 'tester' | 'reviewer' | 'docs' | 'librarian' | 'oracle' | 'builder' | 'optimizer' | 'integrator';
   description: string;
   capabilities: AgentCapability[];
   maxConcurrentTasks: number;

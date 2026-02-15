@@ -281,17 +281,57 @@ function enhanceTasksWithDependencies(tasks: any[], analysis: TaskAnalysis): any
   // Build dependency map
   const dependencies = new Map<string, string[]>();
   
-  // Research should come first
+  // Categorize tasks by agent type (扩展支持 10 种 Agent)
   const researchTasks = tasks.filter(t => t.agentType === 'scout');
+  const librarianTasks = tasks.filter(t => t.agentType === 'librarian');
   const codeTasks = tasks.filter(t => t.agentType === 'coder');
+  const builderTasks = tasks.filter(t => t.agentType === 'builder');
   const testTasks = tasks.filter(t => t.agentType === 'tester');
+  const optimizerTasks = tasks.filter(t => t.agentType === 'optimizer');
+  const integratorTasks = tasks.filter(t => t.agentType === 'integrator');
   const reviewTasks = tasks.filter(t => t.agentType === 'reviewer');
+  const oracleTasks = tasks.filter(t => t.agentType === 'oracle');
   const docTasks = tasks.filter(t => t.agentType === 'docs');
+  
+  // Research/Librarian should come first
+  const infoGatheringTasks = [...researchTasks, ...librarianTasks];
+  
+  // Oracle/Architecture tasks should be early
+  for (const oracle of oracleTasks) {
+    if (infoGatheringTasks.length > 0) {
+      dependencies.set(oracle.id, [infoGatheringTasks[0].id]);
+    }
+  }
   
   // Code depends on research
   for (const code of codeTasks) {
-    if (researchTasks.length > 0) {
-      dependencies.set(code.id, [researchTasks[0].id]);
+    if (infoGatheringTasks.length > 0) {
+      dependencies.set(code.id, [infoGatheringTasks[0].id]);
+    }
+  }
+  
+  // Builder depends on code
+  for (const builder of builderTasks) {
+    if (codeTasks.length > 0) {
+      dependencies.set(builder.id, [codeTasks[0].id]);
+    }
+  }
+  
+  // Integrator depends on builder
+  for (const integrator of integratorTasks) {
+    if (builderTasks.length > 0) {
+      dependencies.set(integrator.id, [builderTasks[0].id]);
+    } else if (codeTasks.length > 0) {
+      dependencies.set(integrator.id, [codeTasks[0].id]);
+    }
+  }
+  
+  // Optimizer depends on code/integrator
+  for (const optimizer of optimizerTasks) {
+    if (integratorTasks.length > 0) {
+      dependencies.set(optimizer.id, [integratorTasks[0].id]);
+    } else if (codeTasks.length > 0) {
+      dependencies.set(optimizer.id, [codeTasks[0].id]);
     }
   }
   
