@@ -6,7 +6,14 @@
  * - Agent assignment and thinking
  * - Execution progress
  * - Final summary reports
+ * 
+ * Features:
+ * - Agent-specific colors
+ * - Chinese/English language support
+ * - Independent thinking display per Agent
  */
+
+import { t, getLocale, toggleLocale, getAgentName, getDomainName, getComplexityName, getStatusName, type Locale } from './i18n/index.js';
 
 // ANSI color codes
 const colors = {
@@ -46,19 +53,51 @@ const colors = {
 };
 
 // Agent type emojis and colors - 扩展支持 10 种 Agent
+// 获取本地化的 role
+function getAgentRole(agentType: string): string {
+  const locale = getLocale();
+  const roles: Record<string, Record<string, string>> = {
+    zh: {
+      scout: '研究探索',
+      coder: '代码实现',
+      tester: '测试验证',
+      reviewer: '代码评审',
+      docs: '文档编写',
+      librarian: '知识管理',
+      oracle: '架构顾问',
+      builder: '构建部署',
+      optimizer: '性能优化',
+      integrator: '集成协调',
+    },
+    en: {
+      scout: 'Research',
+      coder: 'Implementation',
+      tester: 'Testing',
+      reviewer: 'Review',
+      docs: 'Documentation',
+      librarian: 'Knowledge',
+      oracle: 'Architecture',
+      builder: 'Build',
+      optimizer: 'Optimization',
+      integrator: 'Integration',
+    },
+  };
+  return roles[locale]?.[agentType] || roles.zh[agentType] || agentType;
+}
+
 const agentConfig = {
   // 基础 Agent (5个)
-  scout: { emoji: '🔍', color: colors.cyan, name: 'Scout', role: '研究探索', borderColor: '\x1b[38;2;0;212;255m' },
-  coder: { emoji: '💻', color: colors.green, name: 'Coder', role: '代码实现', borderColor: '\x1b[38;2;16;185;129m' },
-  tester: { emoji: '🧪', color: colors.blue, name: 'Tester', role: '测试验证', borderColor: '\x1b[38;2;59;130;246m' },
-  reviewer: { emoji: '👀', color: colors.yellow, name: 'Reviewer', role: '代码评审', borderColor: '\x1b[38;2;245;158;11m' },
-  docs: { emoji: '📝', color: colors.magenta, name: 'Docs', role: '文档编写', borderColor: '\x1b[38;2;139;92;246m' },
+  scout: { emoji: '🔍', color: colors.cyan, name: 'Scout', get role() { return getAgentRole('scout'); }, borderColor: '\x1b[38;2;0;212;255m' },
+  coder: { emoji: '💻', color: colors.green, name: 'Coder', get role() { return getAgentRole('coder'); }, borderColor: '\x1b[38;2;16;185;129m' },
+  tester: { emoji: '🧪', color: colors.blue, name: 'Tester', get role() { return getAgentRole('tester'); }, borderColor: '\x1b[38;2;59;130;246m' },
+  reviewer: { emoji: '👀', color: colors.yellow, name: 'Reviewer', get role() { return getAgentRole('reviewer'); }, borderColor: '\x1b[38;2;245;158;11m' },
+  docs: { emoji: '📝', color: colors.magenta, name: 'Docs', get role() { return getAgentRole('docs'); }, borderColor: '\x1b[38;2;139;92;246m' },
   // 扩展 Agent (5个)
-  librarian: { emoji: '📚', color: '\x1b[38;2;168;85;247m', name: 'Librarian', role: '知识管理', borderColor: '\x1b[38;2;168;85;247m' },
-  oracle: { emoji: '🔮', color: '\x1b[38;2;234;179;8m', name: 'Oracle', role: '架构顾问', borderColor: '\x1b[38;2;234;179;8m' },
-  builder: { emoji: '🏗️', color: '\x1b[38;2;249;115;22m', name: 'Builder', role: '构建部署', borderColor: '\x1b[38;2;249;115;22m' },
-  optimizer: { emoji: '⚡', color: '\x1b[38;2;239;68;68m', name: 'Optimizer', role: '性能优化', borderColor: '\x1b[38;2;239;68;68m' },
-  integrator: { emoji: '🔗', color: '\x1b[38;2;20;184;166m', name: 'Integrator', role: '集成协调', borderColor: '\x1b[38;2;20;184;166m' },
+  librarian: { emoji: '📚', color: '\x1b[38;2;168;85;247m', name: 'Librarian', get role() { return getAgentRole('librarian'); }, borderColor: '\x1b[38;2;168;85;247m' },
+  oracle: { emoji: '🔮', color: '\x1b[38;2;234;179;8m', name: 'Oracle', get role() { return getAgentRole('oracle'); }, borderColor: '\x1b[38;2;234;179;8m' },
+  builder: { emoji: '🏗️', color: '\x1b[38;2;249;115;22m', name: 'Builder', get role() { return getAgentRole('builder'); }, borderColor: '\x1b[38;2;249;115;22m' },
+  optimizer: { emoji: '⚡', color: '\x1b[38;2;239;68;68m', name: 'Optimizer', get role() { return getAgentRole('optimizer'); }, borderColor: '\x1b[38;2;239;68;68m' },
+  integrator: { emoji: '🔗', color: '\x1b[38;2;20;184;166m', name: 'Integrator', get role() { return getAgentRole('integrator'); }, borderColor: '\x1b[38;2;20;184;166m' },
 };
 
 // Status icons
@@ -66,8 +105,8 @@ const statusIcons = {
   pending: { emoji: '⏳', text: '等待中', color: colors.yellow },
   thinking: { emoji: '🤔', text: '思考中', color: colors.cyan },
   working: { emoji: '⚡', text: '工作中', color: colors.blue },
-  completed: { emoji: '✅', text: '已完成', color: colors.green },
-  failed: { emoji: '❌', text: '失败', color: colors.red },
+  completed: { emoji: '✅', get text() { return getLocale() === 'zh' ? '已完成' : 'Completed'; }, color: colors.green },
+  failed: { emoji: '❌', get text() { return getLocale() === 'zh' ? '失败' : 'Failed'; }, color: colors.red },
   waiting: { emoji: '🔄', text: '等待中', color: colors.dim },
 };
 
@@ -231,7 +270,8 @@ export function printAgentThinking(agentType: string, taskName: string, thoughts
   const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
   
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} ${colors.bright}${agent.name}${colors.reset} 正在思考中...                           ${colors.gradient.primary}│${colors.reset}`);
+    const thinkingText = getLocale() === 'zh' ? '正在思考中...' : 'Thinking...';
+  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} ${colors.bright}${agent.name}${colors.reset} ${thinkingText}                           ${colors.gradient.primary}│${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
   console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}任务:${colors.reset} ${colors.white}${taskName}${colors.reset}`);
   console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}思考过程:${colors.reset}`);
@@ -278,11 +318,15 @@ export function printExecutionProgress(completed: number, total: number, duratio
   const empty = 20 - filled;
   
   const progressBar = colors.gradient.secondary + '█'.repeat(filled) + colors.dim + '░'.repeat(empty) + colors.reset;
+  const locale = getLocale();
+  const progressTitle = locale === 'zh' ? '⚡ 执行进度' : '⚡ Execution Progress';
+  const completedLabel = locale === 'zh' ? '已完成' : 'Completed';
+  const durationMs = locale === 'zh' ? '毫秒' : 'ms';
   
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright}⚡ 执行进度${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright}${progressTitle}${colors.reset}`);
   console.log(`${colors.gradient.primary}│${colors.reset}   ${progressBar} ${colors.white}${percentage}%${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}已完成:${colors.reset} ${colors.white}${completed}/${total}${colors.reset}${duration ? ' ' + colors.dim + `(${duration}毫秒)` + colors.reset : ''}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}${completedLabel}:${colors.reset} ${colors.white}${completed}/${total}${colors.reset}${duration ? ' ' + colors.dim + `(${duration}${durationMs})` + colors.reset : ''}`);
   console.log(`${colors.gradient.primary}└─────────────────────────────────────────────────────┘${colors.reset}`);
   console.log('');
 }
@@ -293,14 +337,22 @@ export function printExecutionProgress(completed: number, total: number, duratio
 export function printToolDetection(required: number, missing: number, missingTools?: string[]): void {
   if (required === 0) return;
   
+  const locale = getLocale();
+  const isZh = locale === 'zh';
+  const toolDetectionTitle = isZh ? '🔧 工具检测' : '🔧 Tool Detection';
+  const requiredLabel = isZh ? '需要' : 'Required';
+  const missingLabel = isZh ? '缺失' : 'Missing';
+  const missingToolsLabel = isZh ? '缺失工具:' : 'Missing tools:';
+  const toolsLabel = isZh ? '个工具' : 'tools';
+  
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright + colors.cyan}🔧 Tool Detection${colors.reset}                                   ${colors.gradient.primary}│${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright + colors.cyan}${toolDetectionTitle}${colors.reset}                                   ${colors.gradient.primary}│${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.green}✓${colors.reset} ${colors.white}Required:${colors.reset} ${required} ${colors.dim}tools${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${missing > 0 ? colors.red + '✗' : colors.green + '✓'}${colors.reset} ${colors.white}Missing:${colors.reset} ${missing > 0 ? colors.red : colors.green}${missing} ${colors.dim}tools${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.green}✓${colors.reset} ${colors.white}${requiredLabel}:${colors.reset} ${required} ${colors.dim}${toolsLabel}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${missing > 0 ? colors.red + '✗' : colors.green + '✓'}${colors.reset} ${colors.white}${missingLabel}:${colors.reset} ${missing > 0 ? colors.red : colors.green}${missing} ${colors.dim}${toolsLabel}${colors.reset}`);
   
   if (missingTools && missingTools.length > 0) {
-    console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}Missing tools:${colors.reset}`);
+    console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}${missingToolsLabel}${colors.reset}`);
     missingTools.forEach(tool => {
       console.log(`${colors.gradient.primary}│${colors.reset}      ${colors.yellow}•${colors.reset} ${colors.white}${tool}${colors.reset}`);
     });
@@ -314,16 +366,22 @@ export function printToolDetection(required: number, missing: number, missingToo
  * Print success prediction
  */
 export function printSuccessPrediction(probability: number, factors: string[]): void {
+  const locale = getLocale();
+  const isZh = locale === 'zh';
+  const predictionTitle = isZh ? '📊 成功预测' : '📊 Success Prediction';
+  const probabilityLabel = isZh ? '概率' : 'Probability';
+  const factorsLabel = isZh ? '因素' : 'Factors';
+  
   const probabilityColor = probability >= 70 ? colors.green :
                           probability >= 40 ? colors.yellow : colors.red;
   
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright + colors.cyan}📊 Success Prediction${colors.reset}                             ${colors.gradient.primary}│${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright + colors.cyan}${predictionTitle}${colors.reset}                             ${colors.gradient.primary}│${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}Probability:${colors.reset} ${probabilityColor}${colors.bright}${probability}%${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}${probabilityLabel}:${colors.reset} ${probabilityColor}${colors.bright}${probability}%${colors.reset}`);
   
   if (factors.length > 0) {
-    console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}Factors:${colors.reset}`);
+    console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}${factorsLabel}:${colors.reset}`);
     factors.slice(0, 3).forEach(factor => {
       console.log(`${colors.gradient.primary}│${colors.reset}      ${colors.gradient.primary}•${colors.reset} ${colors.white}${factor}${colors.reset}`);
     });
@@ -344,6 +402,18 @@ export function printSummaryReport(results: {
   agentsUsed: Record<string, number>;
   success: boolean;
 }): void {
+  const locale = getLocale();
+  const isZh = locale === 'zh';
+  const summaryTitle = isZh ? '执行总结' : 'Execution Summary';
+  const statsLabel = isZh ? '统计' : 'Statistics';
+  const totalTasksLabel = isZh ? '总任务数' : 'Total Tasks';
+  const completedLabel = isZh ? '已完成' : 'Completed';
+  const failedLabel = isZh ? '失败' : 'Failed';
+  const durationLabel = isZh ? '耗时' : 'Duration';
+  const agentsLabel = isZh ? '使用的Agent' : 'Agents Used';
+  const allCompletedMsg = isZh ? '✓ 所有任务已完成!' : '✓ All tasks completed!';
+  const partialFailedMsg = isZh ? '✗ 部分任务失败，请查看日志了解详情。' : '✗ Some tasks failed, check logs for details.';
+  
   const successColor = results.success ? colors.green : colors.red;
   const successIcon = results.success ? '🎉' : '💥';
   
@@ -352,7 +422,7 @@ export function printSummaryReport(results: {
   console.log(colors.gradient.primary + '█' + ' '.repeat(68) + '█' + colors.reset);
   
   // Title
-  const title = `${successIcon} 执行总结`;
+  const title = `${successIcon} ${summaryTitle}`;
   const titlePadding = Math.floor((70 - 4 - title.length) / 2);
   console.log(colors.gradient.primary + '█' + ' '.repeat(titlePadding) + colors.bright + successColor + title + colors.reset + colors.gradient.primary + ' '.repeat(70 - 4 - title.length - titlePadding) + '█' + colors.reset);
   
@@ -362,28 +432,29 @@ export function printSummaryReport(results: {
   
   // Stats
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright}📈 Statistics${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright}${statsLabel}${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
   
   // Tasks
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}总任务数:${colors.reset}    ${colors.white}${results.totalTasks}${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.green}已完成:${colors.reset}     ${colors.green}${results.completedTasks}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}${totalTasksLabel}:${colors.reset}    ${colors.white}${results.totalTasks}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.green}${completedLabel}:${colors.reset}     ${colors.green}${results.completedTasks}${colors.reset}`);
   if (results.failedTasks > 0) {
-    console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.red}失败:${colors.reset}        ${colors.red}${results.failedTasks}${colors.reset}`);
+    console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.red}${failedLabel}:${colors.reset}        ${colors.red}${results.failedTasks}${colors.reset}`);
   }
   
   // Duration
   const durationSec = (results.duration / 1000).toFixed(2);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.cyan}Duration:${colors.reset}      ${colors.white}${durationSec}s${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.cyan}${durationLabel}:${colors.reset}      ${colors.white}${durationSec}s${colors.reset}`);
   
   // Agents used
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright}🤖 Agents Used${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright}${agentsLabel}${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
   
   Object.entries(results.agentsUsed).forEach(([agentType, count]) => {
     const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
-    console.log(`${colors.gradient.primary}│${colors.reset}   ${agent.color}${agent.emoji}${colors.reset} ${agent.name}: ${colors.white}${count} task(s)${colors.reset}`);
+    const taskCountLabel = isZh ? '个任务' : 'task(s)';
+    console.log(`${colors.gradient.primary}│${colors.reset}   ${agent.color}${agent.emoji}${colors.reset} ${agent.name}: ${colors.white}${count} ${taskCountLabel}${colors.reset}`);
   });
   
   console.log(`${colors.gradient.primary}└─────────────────────────────────────────────────────┘${colors.reset}`);
@@ -391,10 +462,10 @@ export function printSummaryReport(results: {
   // Success message
   if (results.success) {
     console.log('');
-    console.log(`   ${colors.green}✓ 所有任务已完成!${colors.reset}`);
+    console.log(`   ${colors.green}${allCompletedMsg}${colors.reset}`);
   } else {
     console.log('');
-    console.log(`   ${colors.red}✗ 部分任务失败，请查看日志了解详情。${colors.reset}`);
+    console.log(`   ${colors.red}${partialFailedMsg}${colors.reset}`);
   }
   
   console.log('');
@@ -528,24 +599,54 @@ export function printTaskExecutionStart(taskId: string, taskName: string, agentT
   console.log(`${borderColor}├─────────────────────────────────────────────────────┤${colors.reset}`);
   console.log(`${borderColor}│${colors.reset}   ${colors.white}任务 ID: ${taskId}${' '.repeat(37)}${borderColor}│${colors.reset}`);
   console.log(`${borderColor}│${colors.reset}   ${colors.white}任务: ${taskName}${' '.repeat(40)}${borderColor}│${colors.reset}`);
-  console.log(`${borderColor}│${colors.reset}   ${colors.blue}⚡ 正在执行...${' '.repeat(36)}${borderColor}│${colors.reset}`);
+    const executingText = getLocale() === 'zh' ? '⚡ 正在执行...' : '⚡ Executing...';
+  console.log(`${borderColor}│${colors.reset}   ${executingText}${' '.repeat(40)}${borderColor}│${colors.reset}`);
   console.log(`${borderColor}╰─────────────────────────────────────────────────────╯${colors.reset}`);
   console.log('');
 }
 
 /**
- * Print task execution thinking - 使用 Agent 专属颜色
+ * Print task execution thinking - 使用 Agent 专属颜色 + i18n
  */
 export function printTaskExecutionThinking(agentType: string, thoughts: string[]): void {
+  const locale = getLocale();
   const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
+  const agentName = locale === 'zh' ? agent.name : agent.name;
+  const thinkingLabel = locale === 'zh' ? '思考' : 'Thinking';
   
   thoughts.forEach((thought, index) => {
     const icon = index === 0 ? '🤔' : index === thoughts.length - 1 ? '💡' : '→';
     // 使用 Agent 专属颜色显示名字，思考内容使用淡色
-    console.log(`   ${agent.color}╭─【${agent.name}】思考${'─'.repeat(40)}${colors.reset}`);
+    console.log(`   ${agent.color}╭─【${agentName}】${thinkingLabel}${agent.color}${'─'.repeat(38 - agentName.length - thinkingLabel.length)}${colors.reset}`);
     console.log(`   ${agent.color}│${colors.reset} ${agent.color}${icon}${colors.reset} ${colors.white}${thought}${colors.reset}`);
     console.log(`   ${agent.color}╰${'─'.repeat(56)}${colors.reset}`);
   });
+}
+
+/**
+ * Print thinking block with Agent-specific color - 独立的思考块
+ */
+export function printAgentThinkingBlock(agentType: string, title: string, thoughts: string[]): void {
+  const locale = getLocale();
+  const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
+  const agentName = locale === 'zh' ? agent.name : agent.name;
+  const blockTitle = title || (locale === 'zh' ? '思考过程' : 'Thinking Process');
+  
+  // 使用 Agent 专属颜色的边框
+  const border = agent.borderColor || agent.color;
+  const width = 58;
+  
+  console.log(`\n${border}${'═'.repeat(width)}${colors.reset}`);
+  console.log(`${border}║${colors.reset}  ${agent.color}${agent.emoji} 【${agentName}】${blockTitle}${' '.repeat(Math.max(0, width - 20 - agentName.length - blockTitle.length))}${border}║${colors.reset}`);
+  console.log(`${border}${'═'.repeat(width)}${colors.reset}`);
+  
+  thoughts.forEach((thought, index) => {
+    const icon = index === 0 ? '💭' : index === thoughts.length - 1 ? '✨' : '→';
+    const content = `  ${icon} ${thought}`;
+    console.log(`${border}│${colors.reset} ${content}${' '.repeat(Math.max(0, width - content.length - 2))}${border}│${colors.reset}`);
+  });
+  
+  console.log(`${border}${'═'.repeat(width)}${colors.reset}\n`);
 }
 
 /**
@@ -850,13 +951,18 @@ export function printPerformanceDashboard(metrics: PerformanceMetrics): void {
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
   console.log(`${colors.gradient.primary}│${colors.reset} ${colors.white}各 Agent 表现:${colors.reset}`);
   
+  const locale = getLocale();
+  const isZh = locale === 'zh';
+  const tasksLabel = isZh ? '任务' : 'tasks';
+  const successLabel = isZh ? '成功' : 'success';
+  
   Object.entries(metrics.agentStats).forEach(([agentType, stat]) => {
     const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
     const agentSuccessRate = stat.tasks > 0 ? ((stat.success / stat.tasks) * 100).toFixed(1) : '0.0';
     const agentSuccessColor = parseFloat(agentSuccessRate) >= 80 ? colors.green :
                              parseFloat(agentSuccessRate) >= 60 ? colors.yellow : colors.red;
     
-    console.log(`${colors.gradient.primary}│${colors.reset}   ${agent.color}${agent.emoji}${colors.reset} ${agent.name}: ${stat.tasks}任务/${agentSuccessColor}${agentSuccessRate}%成功`);
+    console.log(`${colors.gradient.primary}│${colors.reset}   ${agent.color}${agent.emoji}${colors.reset} ${agent.name}: ${stat.tasks}${tasksLabel}/${agentSuccessColor}${agentSuccessRate}%${successLabel}`);
   });
   
   console.log(`${colors.gradient.primary}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${colors.reset}`);
@@ -871,13 +977,16 @@ export function printSelfImprovementStatus(
   message: string,
   progress?: number
 ): void {
+  const locale = getLocale();
+  const isZh = locale === 'zh';
+  
   const phaseConfig = {
-    analyzing: { emoji: '🔍', color: colors.cyan, text: '分析中' },
-    learning: { emoji: '🧠', color: colors.magenta, text: '学习中' },
-    optimizing: { emoji: '⚙️', color: colors.yellow, text: '优化中' },
-    applying: { emoji: '🔧', color: colors.blue, text: '应用中' },
-    complete: { emoji: '✅', color: colors.green, text: '完成' },
-    error: { emoji: '❌', color: colors.red, text: '错误' },
+    analyzing: { emoji: '🔍', color: colors.cyan, text: isZh ? '分析中' : 'Analyzing' },
+    learning: { emoji: '🧠', color: colors.magenta, text: isZh ? '学习中' : 'Learning' },
+    optimizing: { emoji: '⚙️', color: colors.yellow, text: isZh ? '优化中' : 'Optimizing' },
+    applying: { emoji: '🔧', color: colors.blue, text: isZh ? '应用中' : 'Applying' },
+    complete: { emoji: '✅', color: colors.green, text: isZh ? '完成' : 'Complete' },
+    error: { emoji: '❌', color: colors.red, text: isZh ? '错误' : 'Error' },
   };
   
   const config = phaseConfig[phase];

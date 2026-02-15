@@ -50,6 +50,7 @@ import { autoImprovementEngine } from './learning/auto-improvement.js';
 import { selfEvaluationEngine } from './learning/self-evaluation.js';
 import { thinkingEngine, type ThinkingMode } from './thinking/engine.js';
 import { hooksSystem, type HookContext, type HookPhase } from './hooks/system.js';
+import { t, getLocale, getDomainName, getComplexityName, getThinkingModeName } from './i18n/index.js';
 
 // Colors for console output
 const colors = {
@@ -260,13 +261,19 @@ export async function executeWithVisualization(goal: string, options?: {
   // ═══════════════════════════════════════════════════════════
   // PHASE 2: Analysis
   // ═══════════════════════════════════════════════════════════
-  await printLoading('正在分析目标...', 800);
+  const locale = getLocale();
+  const analyzingText = locale === 'zh' ? '正在分析目标...' : 'Analyzing goal...';
+  await printLoading(analyzingText, 800);
   const analysis = deepAnalyze(goal);
   
   // 思维推理: 分析目标
-  thinkingEngine.reason(`分析目标: "${goal}"`);
-  thinkingEngine.reason(`识别领域: ${analysis.domain}, 复杂度: ${analysis.complexity}`);
-  thinkingEngine.act(`制定方法: ${analysis.suggestedApproach}`);
+  const analyzingGoal = locale === 'zh' ? '分析目标' : 'Analyzing goal';
+  const identifiedDomain = locale === 'zh' ? '识别领域' : 'Identified domain';
+  const complexity = locale === 'zh' ? '复杂度' : 'Complexity';
+  const approach = locale === 'zh' ? '制定方法' : 'Approach';
+  thinkingEngine.reason(`${analyzingGoal}: "${goal}"`);
+  thinkingEngine.reason(`${identifiedDomain}: ${getDomainName(analysis.domain)}, ${complexity}: ${getComplexityName(analysis.complexity)}`);
+  thinkingEngine.act(`${approach}: ${analysis.suggestedApproach}`);
   
   printAnalysis({
     domain: analysis.domain,
@@ -288,21 +295,25 @@ export async function executeWithVisualization(goal: string, options?: {
   const dangerCheck = detectDangerousOperations(goal);
   
   // 思维观察: 危险检测结果
+  const dangerWarning = locale === 'zh' ? '⚠️ 检测到危险操作' : '⚠️ Dangerous operation detected';
+  const safeCheck = locale === 'zh' ? '✅ 安全检查通过' : '✅ Safety check passed';
   if (dangerCheck.isDangerous) {
-    thinkingEngine.observe(`⚠️ 检测到危险操作: ${dangerCheck.warnings.join(', ')}`);
+    thinkingEngine.observe(`${dangerWarning}: ${dangerCheck.warnings.join(', ')}`);
     printDangerWarning(dangerCheck.warnings, dangerCheck.severity);
   } else {
-    thinkingEngine.observe('✅ 安全检查通过');
+    thinkingEngine.observe(safeCheck);
   }
   
   // ═══════════════════════════════════════════════════════════
   // PHASE 4: Task Decomposition
   // ═══════════════════════════════════════════════════════════
-  await printLoading('正在分解任务...', 600);
+  const decomposingText = locale === 'zh' ? '正在分解任务...' : 'Decomposing tasks...';
+  await printLoading(decomposingText, 600);
   const tasks = await smartDecompose(analysis, goal);
   
   // 思维推理: 任务分解
-  thinkingEngine.reason(`任务分解完成: 共 ${tasks.length} 个子任务`);
+  const taskDecomp = locale === 'zh' ? '任务分解完成' : 'Task decomposition complete';
+  thinkingEngine.reason(`${taskDecomp}: ${tasks.length} ${locale === 'zh' ? '个子任务' : 'subtasks'}`);
   tasks.forEach((t: any, idx: number) => {
     thinkingEngine.act(`  ${idx + 1}. [${t.agentType}] ${t.name}`);
   });
@@ -342,7 +353,9 @@ export async function executeWithVisualization(goal: string, options?: {
   const detection = toolDetector.detectAll(analysis, tasks);
   
   // 思维观察: 工具检测
-  thinkingEngine.observe(`需要工具: ${detection.requiredTools.length}个, 缺失: ${detection.missingTools.length}个`);
+  const toolsNeeded = locale === 'zh' ? '需要工具' : 'Tools needed';
+  const missing = locale === 'zh' ? '缺失' : 'Missing';
+  thinkingEngine.observe(`${toolsNeeded}: ${detection.requiredTools.length}, ${missing}: ${detection.missingTools.length}`);
   
   printToolDetection(
     detection.requiredTools.length,
@@ -353,15 +366,19 @@ export async function executeWithVisualization(goal: string, options?: {
   // ═══════════════════════════════════════════════════════════
   // PHASE 7: Master Agent Coordination Planning
   // ═══════════════════════════════════════════════════════════
+  const masterPlan = locale === 'zh' ? 'Master Agent 协调计划' : 'Master Agent Coordination Plan';
+  const analyzingDeps = locale === 'zh' ? '正在分析任务依赖和执行顺序...' : 'Analyzing task dependencies and execution order...';
+  const bestOrder = locale === 'zh' ? '最优执行顺序' : 'Best execution order';
+  
   if (showThinking && tasks.length > 0) {
     console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${'\x1b[0m'}`);
-    console.log(`${colors.gradient.primary}│${'\x1b[0m'} ${colors.bright}🎯 Master Agent 协调计划${colors.gradient.primary}${' '.repeat(15)}│${'\x1b[0m'}`);
+    console.log(`${colors.gradient.primary}│${'\x1b[0m'} ${colors.bright}🎯 ${masterPlan}${colors.gradient.primary}${' '.repeat(20)}│${'\x1b[0m'}`);
     console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${'\x1b[0m'}`);
-    console.log(`${colors.gradient.primary}│${'\x1b[0m'}   ${colors.white}正在分析任务依赖和执行顺序...${colors.gradient.primary}${' '.repeat(4)}│${'\x1b[0m'}`);
+    console.log(`${colors.gradient.primary}│${'\x1b[0m'}   ${colors.white}${analyzingDeps}${colors.gradient.primary}${' '.repeat(10)}│${'\x1b[0m'}`);
     
     // Determine execution order
     const executionOrder = getExecutionOrder(tasks);
-    console.log(`${colors.gradient.primary}│${'\x1b[0m'}   ${colors.green}✓${colors.white} 最优执行顺序:${colors.gradient.primary}${' '.repeat(18)}│${'\x1b[0m'}`);
+    console.log(`${colors.gradient.primary}│${'\x1b[0m'}   ${colors.green}✓${colors.white} ${bestOrder}:${colors.gradient.primary}${' '.repeat(22)}│${'\x1b[0m'}`);
     
     executionOrder.forEach((task: any, idx: number) => {
       const deps = task.dependencies?.length ? ` (→ ${task.dependencies.join(', ')})` : '';
@@ -379,7 +396,9 @@ export async function executeWithVisualization(goal: string, options?: {
   const prediction = optimizer.predictSuccess({ goal, analysis, tasks, workflow });
   
   // 思维推理: 成功预测
-  thinkingEngine.reason(`成功概率: ${prediction.probability}%, 因素: ${prediction.factors.join(', ')}`);
+  const successProb = locale === 'zh' ? '成功概率' : 'Success probability';
+  const factors = locale === 'zh' ? '因素' : 'Factors';
+  thinkingEngine.reason(`${successProb}: ${prediction.probability}%, ${factors}: ${prediction.factors.join(', ')}`);
   
   printSuccessPrediction(prediction.probability, prediction.factors);
   
@@ -397,13 +416,16 @@ export async function executeWithVisualization(goal: string, options?: {
   const executionMode = options?.mode || 'parallel';
   
   // 思维规划: 执行模式选择
-  thinkingEngine.act(`执行模式: ${executionMode}, 共 ${tasks.length} 个任务`);
+  const execMode = locale === 'zh' ? '执行模式' : 'Execution mode';
+  const totalTasks = locale === 'zh' ? '共' : 'Total';
+  thinkingEngine.act(`${execMode}: ${executionMode}, ${totalTasks} ${tasks.length} ${locale === 'zh' ? '个任务' : 'tasks'}`);
   
   if (options?.autoExecute) {
     printExecutionHeader();
     
     // 思维推理: 开始执行
-    thinkingEngine.reason('开始执行任务...');
+    const startExec = locale === 'zh' ? '开始执行任务...' : 'Starting task execution...';
+    thinkingEngine.reason(startExec);
     
     // 根据模式执行任务
     completedCount = await executeTasksByMode(
@@ -415,13 +437,17 @@ export async function executeWithVisualization(goal: string, options?: {
     );
     
     // 思维观察: 执行结果
-    thinkingEngine.observe(`完成: ${completedCount}/${tasks.length} 个任务`);
+    const completed = locale === 'zh' ? '完成' : 'Completed';
+    thinkingEngine.observe(`${completed}: ${completedCount}/${tasks.length}`);
     
     // 思维反思: 反思执行结果
     if (completedCount === tasks.length) {
-      thinkingEngine.reflect('所有任务执行成功!');
+      const allSuccess = locale === 'zh' ? '所有任务执行成功!' : 'All tasks completed successfully!';
+      thinkingEngine.reflect(allSuccess);
     } else {
-      thinkingEngine.reflect(`有 ${tasks.length - completedCount} 个任务未完成`);
+      const incomplete = locale === 'zh' ? '有' : '';
+      const remaining = locale === 'zh' ? '个任务未完成' : 'tasks incomplete';
+      thinkingEngine.reflect(`${incomplete} ${tasks.length - completedCount} ${remaining}`);
     }
     
     // Hook: 执行阶段完成
@@ -433,7 +459,8 @@ export async function executeWithVisualization(goal: string, options?: {
     await hooksSystem.execute('execution', 'after', hookContext);
   } else {
     printExecutionProgress(0, tasks.length);
-    thinkingEngine.observe('等待手动执行...');
+    const waitManual = locale === 'zh' ? '等待手动执行...' : 'Waiting for manual execution...';
+thinkingEngine.observe(waitManual);
     console.log(`   ${colors.yellow}⏳${'\x1b[0m'} ${colors.dim}Execution pending - add --execute to run${'\x1b[0m'}`);
   }
   

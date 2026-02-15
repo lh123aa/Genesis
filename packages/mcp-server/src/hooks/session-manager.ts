@@ -9,6 +9,8 @@ import { mkdirSync, writeFileSync, readFileSync, existsSync, readdirSync, unlink
 import { join, dirname } from 'path';
 import { homedir } from 'os';
 
+import { getLocale } from '../i18n/index.js';
+
 /**
  * 会话状态
  */
@@ -365,7 +367,9 @@ export class SessionManager {
     
     this.checkpointTimer = setInterval(() => {
       if (this.currentSession && this.currentSession.status === 'running') {
-        this.createCheckpoint('auto', '自动保存');
+        const locale = getLocale();
+        const autoSaveLabel = locale === 'zh' ? '自动保存' : 'Auto-save';
+        this.createCheckpoint('auto', autoSaveLabel);
         this.saveSession();
       }
     }, this.config.autoCheckpointInterval);
@@ -387,13 +391,18 @@ export class SessionManager {
   completeSession(): void {
     if (!this.currentSession) return;
     
+    const locale = getLocale();
+    const isZh = locale === 'zh';
+    const sessionCompleteLabel = isZh ? '会话完成' : 'Session Complete';
+    const completedTasksLabel = isZh ? '完成任务' : 'Completed tasks';
+    
     this.currentSession.status = 'completed';
     this.currentSession.lastUpdateTime = Date.now();
     this.stopAutoCheckpoint();
     this.saveSession();
     
-    console.log(`${colors.green}✅ 会话完成: ${this.currentSession.sessionId}${colors.reset}`);
-    console.log(`${colors.cyan}   完成任务: ${this.currentSession.progress.completedTasks}/${this.currentSession.progress.totalTasks}${colors.reset}`);
+    console.log(`${colors.green}✅ ${sessionCompleteLabel}: ${this.currentSession.sessionId}${colors.reset}`);
+    console.log(`${colors.cyan}   ${completedTasksLabel}: ${this.currentSession.progress.completedTasks}/${this.currentSession.progress.totalTasks}${colors.reset}`);
   }
   
   /**
@@ -402,13 +411,19 @@ export class SessionManager {
   interruptSession(reason?: string): void {
     if (!this.currentSession) return;
     
+    const locale = getLocale();
+    const isZh = locale === 'zh';
+    const sessionInterruptedLabel = isZh ? '会话中断' : 'Session Interrupted';
+    const unknownReason = isZh ? '未知原因' : 'Unknown reason';
+    const sessionSavedLabel = isZh ? '会话已保存，可使用 sessionId 恢复' : 'Session saved, can be recovered with sessionId';
+    
     this.currentSession.status = 'interrupted';
     this.currentSession.lastUpdateTime = Date.now();
     this.stopAutoCheckpoint();
     this.saveSession();
     
-    console.log(`${colors.yellow}⚠️ 会话中断: ${reason || '未知原因'}${colors.reset}`);
-    console.log(`${colors.cyan}   会话已保存，可使用 sessionId 恢复${colors.reset}`);
+    console.log(`${colors.yellow}⚠️ ${sessionInterruptedLabel}: ${reason || unknownReason}${colors.reset}`);
+    console.log(`${colors.cyan}   ${sessionSavedLabel}${colors.reset}`);
   }
   
   /**
@@ -435,54 +450,78 @@ export class SessionManager {
    * 生成会话报告
    */
   getSessionReport(): string {
+    const locale = getLocale();
+    const isZh = locale === 'zh';
+    
     if (!this.currentSession) {
-      return '没有活动的会话';
+      return isZh ? '没有活动的会话' : 'No active session';
     }
     
     const session = this.currentSession;
     const duration = (session.lastUpdateTime - session.startTime) / 1000;
     const progress = this.getProgressPercent();
     
+    // Labels
+    const sessionReportLabel = isZh ? '会话报告' : 'Session Report';
+    const sessionIdLabel = isZh ? '会话 ID' : 'Session ID';
+    const goalLabel = isZh ? '目标' : 'Goal';
+    const statusLabel = isZh ? '状态' : 'Status';
+    const progressLabel = isZh ? '进度' : 'Progress';
+    const totalTasksLabel = isZh ? '总任务' : 'Total tasks';
+    const completedLabel = isZh ? '已完成' : 'Completed';
+    const failedLabel = isZh ? '失败' : 'Failed';
+    const percentLabel = isZh ? '百分比' : 'Percent';
+    const timeLabel = isZh ? '时间' : 'Time';
+    const startLabel = isZh ? '开始' : 'Started';
+    const durationLabel = isZh ? '持续' : 'Duration';
+    const secondsLabel = isZh ? '秒' : 'seconds';
+    const currentTaskLabel = isZh ? '当前任务' : 'Current task';
+    const taskNameLabel = isZh ? '名称' : 'Name';
+    const agentLabel = isZh ? 'Agent' : 'Agent';
+    const checkpointsLabel = isZh ? '检查点' : 'Checkpoints';
+    
     let report = `
 ${'='.repeat(60)}
-📋 会话报告
+📋 ${sessionReportLabel}
 ${'='.repeat(60)}
 
-🆔 会话 ID: ${session.sessionId}
-🎯 目标: ${session.goal}
-📊 状态: ${this.getStatusIcon(session.status)} ${session.status}
+🆔 ${sessionIdLabel}: ${session.sessionId}
+🎯 ${goalLabel}: ${session.goal}
+📊 ${statusLabel}: ${this.getStatusIcon(session.status)} ${session.status}
 
-📈 进度:
-   总任务: ${session.progress.totalTasks}
-   已完成: ${session.progress.completedTasks}
-   失败: ${session.progress.failedTasks}
-   百分比: ${progress.toFixed(1)}%
+📈 ${progressLabel}:
+   ${totalTasksLabel}: ${session.progress.totalTasks}
+   ${completedLabel}: ${session.progress.completedTasks}
+   ${failedLabel}: ${session.progress.failedTasks}
+   ${percentLabel}: ${progress.toFixed(1)}%
 
-⏱️ 时间:
-   开始: ${new Date(session.startTime).toLocaleString()}
-   持续: ${duration.toFixed(1)} 秒
+⏱️ ${timeLabel}:
+   ${startLabel}: ${new Date(session.startTime).toLocaleString()}
+   ${durationLabel}: ${duration.toFixed(1)} ${secondsLabel}
 `;
     
     if (session.currentTask) {
       report += `
-🔄 当前任务:
-   名称: ${session.currentTask.name}
-   Agent: ${session.currentTask.agentType}
+🔄 ${currentTaskLabel}:
+   ${taskNameLabel}: ${session.currentTask.name}
+   ${agentLabel}: ${session.currentTask.agentType}
 `;
     }
     
     if (session.checkpoints.length > 0) {
       report += `
-📝 检查点 (${session.checkpoints.length}):
+📝 ${checkpointsLabel} (${session.checkpoints.length}):
 `;
       session.checkpoints.slice(-3).forEach(cp => {
         report += `   • ${new Date(cp.timestamp).toLocaleTimeString()} - ${cp.description}\n`;
       });
     }
     
+    const errorLabel = isZh ? '错误' : 'Error';
+    
     if (session.error) {
       report += `
-🚨 错误:
+🚨 ${errorLabel}:
    ${session.error.message}
 `;
     }

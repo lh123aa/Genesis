@@ -7,6 +7,7 @@
 
 import { contextMonitor, getContextStats, shouldCompact, compactContext, getContextReport } from './context-monitor.js';
 import { sessionManager, printSessionStatus, getSessionReport } from './session-manager.js';
+import { t, getLocale } from '../i18n/index.js';
 
 // ANSI 颜色定义
 const colors = {
@@ -251,13 +252,20 @@ function createTodoContinuationEnforcer(): Hook {
     enabled: true,
     handler: async (context) => {
       const { data } = context;
+      const locale = getLocale();
       if (data.completedTasks !== undefined && data.totalTasks !== undefined) {
         const pending = data.totalTasks - data.completedTasks;
+        const warning = locale === 'zh' ? '警告' : 'Warning';
+        const pendingTasks = locale === 'zh' ? '还有' : '';
+        const tasksRemain = locale === 'zh' ? '个任务未完成' : 'tasks incomplete';
+        const trying = locale === 'zh' ? '系统将尝试继续执行这些任务...' : 'System will try to continue...';
+        const allDone = locale === 'zh' ? '所有任务已完成!' : 'All tasks completed!';
+        
         if (pending > 0) {
-          console.log(`${colors.yellow}⚠️ 警告: 还有 ${pending} 个任务未完成${colors.reset}`);
-          console.log(`${colors.dim}   系统将尝试继续执行这些任务...${colors.reset}`);
+          console.log(`${colors.yellow}⚠️ ${warning}: ${pendingTasks} ${pending} ${tasksRemain}${colors.reset}`);
+          console.log(`${colors.dim}   ${trying}${colors.reset}`);
         } else {
-          console.log(`${colors.green}✅ 所有任务已完成!${colors.reset}`);
+          console.log(`${colors.green}✅ ${allDone}${colors.reset}`);
         }
       }
     },
@@ -312,12 +320,17 @@ function createExecutionTimeMonitor(): Hook {
     enabled: true,
     handler: async (context) => {
       const { metadata, data } = context;
+      const locale = getLocale();
       const duration = metadata.currentTime - metadata.startTime;
       
-      console.log(`${colors.cyan}⏱️ 执行耗时: ${(duration / 1000).toFixed(2)}秒${colors.reset}`);
+      const durationText = locale === 'zh' ? '执行耗时' : 'Execution time';
+      const durationSec = locale === 'zh' ? '秒' : 'seconds';
+      const warning = locale === 'zh' ? '⚠️ 执行时间超过1分钟，考虑优化' : '⚠️ Execution over 1 minute, consider optimization';
+      
+      console.log(`${colors.cyan}⏱️ ${durationText}: ${(duration / 1000).toFixed(2)}${durationSec}${colors.reset}`);
       
       if (duration > 60000) {
-        console.log(`${colors.yellow}⚠️ 执行时间超过1分钟，考虑优化${colors.reset}`);
+        console.log(`${colors.yellow}${warning}${colors.reset}`);
       }
     },
   };
@@ -336,10 +349,12 @@ function createTaskStatistics(): Hook {
     enabled: true,
     handler: async (context) => {
       const { data } = context;
+      const locale = getLocale();
       
       if (data.completedTasks !== undefined && data.totalTasks !== undefined) {
         const successRate = ((data.completedTasks / data.totalTasks) * 100).toFixed(1);
-        console.log(`${colors.cyan}📊 任务完成率: ${successRate}%${colors.reset}`);
+        const statText = locale === 'zh' ? '任务完成率' : 'Task completion rate';
+        console.log(`${colors.cyan}📊 ${statText}: ${successRate}%${colors.reset}`);
       }
     },
   };
@@ -451,16 +466,20 @@ function createSessionRecoveryHook(): Hook {
     priority: 10,
     enabled: true,
     handler: async (context) => {
+      const locale = getLocale();
+      const foundInter = locale === 'zh' ? '发现中断的会话' : 'Found interrupted session';
+      const recovered = locale === 'zh' ? '已恢复会话，可继续执行' : 'Session recovered, can continue';
+      
       // 检查是否有可恢复的会话
       const recentSessions = sessionManager.getRecentSessions(3);
       const interrupted = recentSessions.find(s => s.status === 'interrupted');
       
       if (interrupted) {
-        console.log(`${colors.yellow}📂 发现中断的会话: ${interrupted.id}${colors.reset}`);
-        const recovered = sessionManager.recoverSession(interrupted.id);
+        console.log(`${colors.yellow}📂 ${foundInter}: ${interrupted.id}${colors.reset}`);
+        const recoveredSession = sessionManager.recoverSession(interrupted.id);
         
-        if (recovered) {
-          console.log(`${colors.green}✅ 已恢复会话，可继续执行${colors.reset}`);
+        if (recoveredSession) {
+          console.log(`${colors.green}✅ ${recovered}${colors.reset}`);
           console.log(getSessionReport());
         }
       }
@@ -521,13 +540,15 @@ function createSessionCompletionHook(): Hook {
     enabled: true,
     handler: async (context) => {
       const session = sessionManager.getCurrentSession();
+      const locale = getLocale();
       if (session) {
         const success = context.data.executionData?.success;
+        const interruptMsg = locale === 'zh' ? '执行未完全成功' : 'Execution not fully successful';
         
         if (success) {
           sessionManager.completeSession();
         } else {
-          sessionManager.interruptSession('执行未完全成功');
+          sessionManager.interruptSession(interruptMsg);
         }
         
         console.log(getSessionReport());
@@ -548,8 +569,10 @@ function createInitializationHook(): Hook {
     priority: 1,
     enabled: true,
     handler: async (context) => {
-      console.log(`${colors.cyan}🚀 Genesis Hooks 系统初始化${colors.reset}`);
-      console.log(`${colors.dim}   目标: ${context.goal}${colors.reset}`);
+      const locale = getLocale();
+      const title = locale === 'zh' ? 'Genesis Hooks 系统初始化' : 'Genesis Hooks System Initialization';
+      console.log(`${colors.cyan}🚀 ${title}${colors.reset}`);
+      console.log(`${colors.dim}   ${locale === 'zh' ? '目标' : 'Goal'}: ${context.goal}${colors.reset}`);
     },
   };
 }
@@ -567,9 +590,13 @@ function createAnalysisCompleteHook(): Hook {
     enabled: true,
     handler: async (context) => {
       const { data } = context;
+      const locale = getLocale();
       if (data.analysis) {
-        console.log(`${colors.green}✅ 分析完成${colors.reset}`);
-        console.log(`${colors.dim}   领域: ${data.analysis.domain}, 复杂度: ${data.analysis.complexity}${colors.reset}`);
+        const completed = locale === 'zh' ? '分析完成' : 'Analysis complete';
+        const domain = locale === 'zh' ? '领域' : 'Domain';
+        const complexity = locale === 'zh' ? '复杂度' : 'Complexity';
+        console.log(`${colors.green}✅ ${completed}${colors.reset}`);
+        console.log(`${colors.dim}   ${domain}: ${data.analysis.domain}, ${complexity}: ${data.analysis.complexity}${colors.reset}`);
       }
     },
   };
@@ -588,8 +615,11 @@ function createPlanningCompleteHook(): Hook {
     enabled: true,
     handler: async (context) => {
       const { data } = context;
+      const locale = getLocale();
       if (data.tasks) {
-        console.log(`${colors.green}✅ 规划完成: ${data.tasks.length} 个任务${colors.reset}`);
+        const completed = locale === 'zh' ? '规划完成' : 'Planning complete';
+        const tasks = locale === 'zh' ? '个任务' : 'tasks';
+        console.log(`${colors.green}✅ ${completed}: ${data.tasks.length} ${tasks}${colors.reset}`);
       }
     },
   };

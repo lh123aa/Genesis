@@ -19,6 +19,7 @@ import { optimizer } from '../learning/optimizer.js';
 import { knowledgeBase } from '../learning/knowledge.js';
 import { requirementGatherer, type ClarifyingQuestion, type RequirementSummary } from '../agents/requirement-gatherer.js';
 import { selfEvaluationEngine, type SystemEvaluationReport, type EvaluationDimension } from '../learning/self-evaluation.js';
+import { getLocale } from '../i18n/index.js';
 
 /**
  * Tool: agent_orchestrate
@@ -330,18 +331,24 @@ The tool returns a complete plan with analysis, task breakdown, tool requirement
   },
   handler: async (args) => {
     const parsed = ThinkSchema.parse(args);
+    const locale = getLocale();
+    const isZh = locale === 'zh';
     
-    console.log(`🧠 Genesis 正在思考: ${parsed.goal}`);
+    const thinkingLabel = isZh ? '正在思考' : 'Thinking';
+    const phase0Label = isZh ? '【阶段 0】需求收集' : '【Phase 0】Requirement Gathering';
+    const askQuestionsMsg = isZh ? '为了更好地理解您的需求，请回答以下问题' : 'To better understand your needs, please answer the following questions';
+    
+    console.log(`🧠 Genesis ${thinkingLabel}: ${parsed.goal}`);
     
     // ===== 阶段 0: 需求收集 =====
-    console.log('\n📋 【阶段 0】需求收集...');
+    console.log('\n📋 ' + phase0Label + '...');
     
     // 启动需求收集
     const requirementSummary = requirementGatherer.startGathering(parsed.goal);
     const questions = requirementSummary.questions;
     
     // 显示问题给用户
-    console.log('\n❓ 为了更好地理解您的需求，请回答以下问题：\n');
+    console.log('\n❓ ' + askQuestionsMsg + '：\n');
     
     const pendingQuestions = questions.filter(q => !q.userAnswer);
     pendingQuestions.forEach((q, idx) => {
@@ -360,9 +367,12 @@ The tool returns a complete plan with analysis, task breakdown, tool requirement
         console.log('\n' + confirmationSummary);
       }
       
+      const clarifyingMsg = isZh ? '需要澄清需求，请回答上述问题后确认执行' : 'Requirements need clarification, please answer the questions above to confirm execution';
+      const messageZh = isZh ? '我需要先了解一些细节问题。请回复每个问题的答案，例如："1. 研究卡塔尔电商市场 2. 详细报告 3. 官方数据"' : 'I need to understand some details. Please reply with your answers, e.g.: "1. Research Qatar e-commerce market 2. Detailed report 3. Official data"';
+      
       return {
         status: 'clarifying',
-        message: '需要澄清需求，请回答上述问题后确认执行',
+        message: clarifyingMsg,
         requirementSummary: {
           originalGoal: requirementSummary.originalGoal,
           understoodGoal: requirementSummary.understoodGoal,
@@ -378,35 +388,47 @@ The tool returns a complete plan with analysis, task breakdown, tool requirement
             options: q.options,
           })),
         },
-        message_zh: '我需要先了解一些细节问题。请回复每个问题的答案，例如："1. 研究卡塔尔电商市场 2. 详细报告 3. 官方数据"'
+        message_zh: messageZh
       };
     }
     
     // 用户已确认，执行实际任务
-    console.log('\n✅ 需求已确认，开始执行...\n');
+    const requirementConfirmedMsg = isZh ? '需求已确认，开始执行...' : 'Requirements confirmed, starting execution...';
+    console.log('\n✅ ' + requirementConfirmedMsg + '\n');
     
     try {
       // Step 1: Analyze the goal
-      console.log('  📊 正在分析目标...');
+      const analyzingGoalMsg = isZh ? '正在分析目标...' : 'Analyzing goal...';
+      const domainLabel = isZh ? '领域' : 'Domain';
+      const complexityLabel = isZh ? '复杂度' : 'Complexity';
+      const estimatedStepsLabel = isZh ? '预计步骤' : 'Estimated steps';
+      console.log('\n  📊 ' + analyzingGoalMsg);
       const analysis = plannerAgent.analyze({
         goal: parsed.goal,
         context: parsed.context,
       });
       
-      console.log(`     领域: ${analysis.domain}`);
-      console.log(`     复杂度: ${analysis.complexity}`);
-      console.log(`     预计步骤: ${analysis.estimatedSteps}`);
+      console.log(`     ${domainLabel}: ${analysis.domain}`);
+      console.log(`     ${complexityLabel}: ${analysis.complexity}`);
+      console.log(`     ${estimatedStepsLabel}: ${analysis.estimatedSteps}`);
       
       // Step 2: Decompose into tasks
-      console.log('  🔨 正在分解任务...');
+      const decomposingMsg = isZh ? '正在分解任务...' : 'Decomposing tasks...';
+      const tasksCreatedMsg = isZh ? '创建了' : 'Created';
+      const tasksCountMsg = isZh ? '个任务' : 'tasks';
+      console.log('  🔨 ' + decomposingMsg);
       const taskNodes = taskDecomposer.decompose(analysis);
-      console.log(`     创建了 ${taskNodes.length} 个任务`);
+      console.log(`     ${tasksCreatedMsg} ${taskNodes.length} ${tasksCountMsg}`);
       
       // Step 3: Detect required tools (Phase 3)
-      console.log('  🔍 正在检测所需工具...');
+      const detectingToolsMsg = isZh ? '正在检测所需工具...' : 'Detecting required tools...';
+      const requiredToolsMsg = isZh ? '需要' : 'Required';
+      const missingToolsMsg = isZh ? '缺失' : 'Missing';
+      const toolsCountMsg = isZh ? '个工具' : 'tools';
+      console.log('  🔍 ' + detectingToolsMsg);
       const toolDetection = toolDetector.detectAll(analysis, taskNodes);
-      console.log(`     需要: ${toolDetection.requiredTools.length} 个工具`);
-      console.log(`     缺失: ${toolDetection.missingTools.length} 个工具`);
+      console.log(`     ${requiredToolsMsg}: ${toolDetection.requiredTools.length} ${toolsCountMsg}`);
+      console.log(`     ${missingToolsMsg}: ${toolDetection.missingTools.length} ${toolsCountMsg}`);
       console.log(`     已安装: ${toolDetection.installedTools.length} 个工具`);
       
       // Step 4: Check installation status
