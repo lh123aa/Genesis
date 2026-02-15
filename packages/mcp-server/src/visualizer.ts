@@ -47,11 +47,11 @@ const colors = {
 
 // Agent type emojis and colors
 const agentConfig = {
-  scout: { emoji: '🔍', color: colors.cyan, name: 'Scout', role: 'Research & Discovery' },
-  coder: { emoji: '💻', color: colors.green, name: 'Coder', role: 'Implementation' },
-  tester: { emoji: '🧪', color: colors.blue, name: 'Tester', role: 'Validation' },
-  reviewer: { emoji: '👀', color: colors.yellow, name: 'Reviewer', role: 'Quality Assurance' },
-  docs: { emoji: '📝', color: colors.magenta, name: 'Docs', role: 'Documentation' },
+  scout: { emoji: '🔍', color: colors.cyan, name: 'Scout', role: '研究探索' },
+  coder: { emoji: '💻', color: colors.green, name: 'Coder', role: '代码实现' },
+  tester: { emoji: '🧪', color: colors.blue, name: 'Tester', role: '测试验证' },
+  reviewer: { emoji: '👀', color: colors.yellow, name: 'Reviewer', role: '代码评审' },
+  docs: { emoji: '📝', color: colors.magenta, name: 'Docs', role: '文档编写' },
 };
 
 // Status icons
@@ -516,11 +516,11 @@ export function printTaskExecutionStart(taskId: string, taskName: string, agentT
   
   console.log('');
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} ${colors.bright}${agent.name} started${colors.reset}                               ${colors.gradient.primary}│${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} 【${agent.name}】开始执行任务${colors.reset}                      ${colors.gradient.primary}│${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}Task ID: ${taskId}${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}Task: ${taskName}${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.blue}⚡ Executing...${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}任务 ID: ${taskId}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}任务: ${taskName}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.blue}⚡ 正在执行...${colors.reset}`);
   console.log(`${colors.gradient.primary}└─────────────────────────────────────────────────────┘${colors.reset}`);
   console.log('');
 }
@@ -533,7 +533,7 @@ export function printTaskExecutionThinking(agentType: string, thoughts: string[]
   
   thoughts.forEach((thought, index) => {
     const icon = index === 0 ? '🤔' : index === thoughts.length - 1 ? '💡' : '→';
-    console.log(`   ${colors.cyan}${icon}${colors.reset} ${colors.dim}${thought}${colors.reset}`);
+    console.log(`   ${agent.color}【${agent.name}】${colors.reset} ${colors.cyan}${icon}${colors.reset} ${colors.dim}${thought}${colors.reset}`);
   });
 }
 
@@ -545,7 +545,7 @@ export function printTaskExecutionResult(taskId: string, taskName: string, agent
   
   console.log('');
   console.log(`${colors.green}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.green}│${colors.reset} ${agent.color}${agent.emoji} ${colors.bright}${agent.name} 已完成${colors.reset}                           ${colors.green}│${colors.reset}`);
+  console.log(`${colors.green}│${colors.reset} ${agent.color}${agent.emoji} 【${agent.name}】已完成任务${colors.reset}                          ${colors.green}│${colors.reset}`);
   console.log(`${colors.green}├─────────────────────────────────────────────────────┤${colors.reset}`);
   console.log(`${colors.green}│${colors.reset}   ${colors.white}任务 ID: ${taskId}${colors.reset}`);
   console.log(`${colors.green}│${colors.reset}   ${colors.white}任务: ${taskName}${colors.reset}`);
@@ -611,7 +611,7 @@ export function printParallelAgentsDashboard(agents: AgentState[]): void {
   console.log(colors.gradient.primary + '┌' + '─'.repeat(68) + '┐' + colors.reset);
   
   // Header
-  const header = '🎭 Multi-Agent Parallel Execution';
+  const header = '🎭 多 Agent 并行执行仪表盘';
   const headerPad = Math.floor((68 - header.length) / 2);
   console.log(colors.gradient.primary + '│' + ' '.repeat(headerPad) + colors.bright + colors.white + header + colors.reset + colors.gradient.primary + ' '.repeat(68 - header.length - headerPad) + '│' + colors.reset);
   console.log(colors.gradient.primary + '├' + '─'.repeat(68) + '┤' + colors.reset);
@@ -632,7 +632,7 @@ export function printParallelAgentsDashboard(agents: AgentState[]): void {
     const msgInfo = agent.message ? ` | ${agent.message.substring(0, 20)}` : '';
     
     console.log(colors.gradient.primary + '│' + colors.reset + 
-      ` ${agent.color}${agent.emoji}${colors.reset} ${agent.color}${agent.name}${colors.reset}` +
+      ` ${agent.color}${agent.emoji} 【${agent.name}】${colors.reset}` +
       statusColor + ` ${statusIcon} ${agent.status.toUpperCase()}${colors.reset}` +
       statusBar +
       colors.dim + taskInfo + msgInfo + ' '.repeat(Math.max(0, 48 - (taskInfo.length + msgInfo.length))) +
@@ -716,11 +716,11 @@ export function printAgentThinkingBubble(agentType: string, thought: string, ste
   const progress = '●'.repeat(step) + '○'.repeat(total - step);
   
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} @${agent.name}${colors.reset} ${colors.dim}思考中${colors.reset} ${colors.yellow}${progress}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} 【${agent.name}】${colors.reset} ${colors.dim}思考中${colors.reset} ${colors.yellow}${progress}${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
   
   // Word wrap thought
-  const maxWidth = 58;
+  const maxWidth = 55;
   const words = thought.split(' ');
   let line = '';
   words.forEach(word => {
