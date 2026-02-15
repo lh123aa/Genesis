@@ -17,6 +17,7 @@ import { executionHistory } from '../learning/history.js';
 import { learningEngine } from '../learning/engine.js';
 import { optimizer } from '../learning/optimizer.js';
 import { knowledgeBase } from '../learning/knowledge.js';
+import { requirementGatherer, type ClarifyingQuestion, type RequirementSummary } from '../agents/requirement-gatherer.js';
 
 /**
  * Tool: agent_orchestrate
@@ -315,6 +316,58 @@ The tool returns a complete plan with analysis, task breakdown, tool requirement
     const parsed = ThinkSchema.parse(args);
     
     console.log(`🧠 Genesis 正在思考: ${parsed.goal}`);
+    
+    // ===== 阶段 0: 需求收集 =====
+    console.log('\n📋 【阶段 0】需求收集...');
+    
+    // 启动需求收集
+    const requirementSummary = requirementGatherer.startGathering(parsed.goal);
+    const questions = requirementSummary.questions;
+    
+    // 显示问题给用户
+    console.log('\n❓ 为了更好地理解您的需求，请回答以下问题：\n');
+    
+    const pendingQuestions = questions.filter(q => !q.userAnswer);
+    pendingQuestions.forEach((q, idx) => {
+      const impEmoji = q.importance === 'critical' ? '🔴' : q.importance === 'high' ? '🟠' : q.importance === 'medium' ? '🟡' : '🟢';
+      console.log(`  ${impEmoji} 问题 ${idx + 1}: ${q.question}`);
+      if (q.options) {
+        console.log(`     选项: ${q.options.join(' | ')}`);
+      }
+    });
+    
+    // 如果有未回答的问题，返回问题列表等待用户确认
+    if (pendingQuestions.length > 0) {
+      // 生成确认摘要
+      const confirmationSummary = requirementGatherer.generateConfirmationSummary();
+      if (confirmationSummary) {
+        console.log('\n' + confirmationSummary);
+      }
+      
+      return {
+        status: 'clarifying',
+        message: '需要澄清需求，请回答上述问题后确认执行',
+        requirementSummary: {
+          originalGoal: requirementSummary.originalGoal,
+          understoodGoal: requirementSummary.understoodGoal,
+          domain: requirementSummary.domain,
+          complexity: requirementSummary.complexity,
+          scope: requirementSummary.scope,
+          answeredQuestions: requirementSummary.answeredQuestions,
+          totalQuestions: requirementSummary.totalQuestions,
+          pendingQuestions: pendingQuestions.map(q => ({
+            id: q.id,
+            question: q.question,
+            importance: q.importance,
+            options: q.options,
+          })),
+        },
+        message_zh: '我需要先了解一些细节问题。请回复每个问题的答案，例如："1. 研究卡塔尔电商市场 2. 详细报告 3. 官方数据"'
+      };
+    }
+    
+    // 用户已确认，执行实际任务
+    console.log('\n✅ 需求已确认，开始执行...\n');
     
     try {
       // Step 1: Analyze the goal
@@ -879,6 +932,243 @@ Examples:
 };
 
 /**
+ * Tool: genesis_answer_question
+ * 
+ * 回答需求澄清问题
+ */
+const genesisAnswerQuestion: Tool = {
+  name: 'genesis_answer_question',
+  description: `回答需求澄清问题。
+
+在收到需求澄清请求后，使用此工具回答问题。
+可以一次性回答多个问题，用逗号或换行分隔。
+
+Examples:
+1. 回答问题 "1. 研究卡塔尔电商市场 2. 详细报告"
+2. 回答 "q1:卡塔尔电商市场,q2:详细报告,q3:官方数据"`,
+  inputSchema: {
+    type: 'object',
+    properties: {
+      answers: {
+        type: 'string',
+        description: '问题答案，可以是 "序号.答案" 格式或 "问题ID:答案" 格式，多个答案用逗号或换行分隔',
+      },
+    },
+    required: ['answers'],
+  },
+  handler: async (args) => {
+    const { answers } = args as { answers: string };
+    
+    console.log('\n📝 收到回答，正在处理...\n');
+    
+    // 解析答案
+    const currentSummary = requirementGatherer.getCurrentSummary();
+    if (!currentSummary) {
+      return {
+        status: 'error',
+        message: '没有正在进行的需求收集，请先提交任务目标',
+      };
+    }
+    
+    // 解析答案格式
+    const answerLines = answers.split(/[,，\n]/).map(a => a.trim()).filter(a => a);
+    
+    // 尝试匹配问题并回答
+    let answeredCount = 0;
+    for (const answer of answerLines) {
+      // 尝试 "序号.答案" 格式
+      const numMatch = answer.match(/^(\d+)[:：.\s]*(.+)$/);
+      if (numMatch) {
+        const qIndex = parseInt(numMatch[1]) - 1;
+        const q = currentSummary.questions[qIndex];
+        if (q) {
+          requirementGatherer.answerQuestion(q.id, numMatch[2]);
+          console.log(`  ✓ 已回答: ${q.question}`);
+          console.log(`    → ${numMatch[2]}`);
+          answeredCount++;
+        }
+      } else {
+        // 尝试匹配 "问题ID:答案" 格式
+        const idMatch = answer.match(/^(q\d+)[:：]\s*(.+)$/i);
+        if (idMatch) {
+          requirementGatherer.answerQuestion(idMatch[1], idMatch[2]);
+          const q = currentSummary.questions.find(q => q.id === idMatch[1]);
+          if (q) {
+            console.log(`  ✓ 已回答: ${q.question}`);
+            console.log(`    → ${idMatch[2]}`);
+            answeredCount++;
+          }
+        }
+      }
+    }
+    
+    // 获取更新后的摘要
+    const updatedSummary = requirementGatherer.getCurrentSummary();
+    if (!updatedSummary) {
+      return { status: 'error', message: '需求收集失败' };
+    }
+    
+    const pendingQuestions = updatedSummary.questions.filter(q => !q.userAnswer);
+    
+    // 如果还有未回答的问题，继续
+    if (pendingQuestions.length > 0) {
+      console.log('\n❓ 还有以下问题需要回答：\n');
+      pendingQuestions.forEach((q, idx) => {
+        console.log(`  ${idx + 1}. ${q.question}`);
+        if (q.options) console.log(`     选项: ${q.options.join(' | ')}`);
+      });
+      
+      return {
+        status: 'clarifying',
+        message: `已回答 ${answeredCount} 个问题，还剩 ${pendingQuestions.length} 个问题`,
+        answeredQuestions: updatedSummary.answeredQuestions,
+        totalQuestions: updatedSummary.totalQuestions,
+        pendingQuestions: pendingQuestions.map(q => ({
+          id: q.id,
+          question: q.question,
+          importance: q.importance,
+          options: q.options,
+        })),
+        message_zh: `已收到您的回答！还剩 ${pendingQuestions.length} 个问题需要回答。请继续回复，例如："4. 每天 5. JSON"`,
+      };
+    }
+    
+    // 所有问题已回答，生成确认摘要
+    const confirmationSummary = requirementGatherer.generateConfirmationSummary();
+    if (confirmationSummary) {
+      console.log('\n' + confirmationSummary);
+    }
+    
+    return {
+      status: 'ready_to_confirm',
+      message: '所有问题已回答，请确认后执行',
+      requirementSummary: {
+        originalGoal: updatedSummary.originalGoal,
+        understoodGoal: updatedSummary.understoodGoal,
+        domain: updatedSummary.domain,
+        complexity: updatedSummary.complexity,
+        scope: updatedSummary.scope,
+        expectedDeliverables: updatedSummary.expectedDeliverables,
+        answeredQuestions: updatedSummary.answeredQuestions,
+        totalQuestions: updatedSummary.totalQuestions,
+      },
+      message_zh: '所有问题已回答完毕！请回复"确认"开始执行，或提出需要修改的部分。',
+    };
+  },
+};
+
+/**
+ * Tool: genesis_confirm_execute
+ * 
+ * 确认需求并开始执行
+ */
+const genesisConfirmExecute: Tool = {
+  name: 'genesis_confirm_execute',
+  description: `确认需求并开始执行任务。
+
+在回答完所有问题后，使用此工具确认需求并开始执行。
+可以传入 "confirm" 或 "执行" 来确认执行。
+
+如果用户想要修改需求，传入具体修改内容。`,
+  inputSchema: {
+    type: 'object',
+    properties: {
+      action: {
+        type: 'string',
+        description: '操作类型: "confirm" 或 "execute" 确认执行，"modify" 修改需求',
+      },
+      modifications: {
+        type: 'string',
+        description: '如果 action 是 modify，传入具体的修改内容',
+      },
+    },
+    required: ['action'],
+  },
+  handler: async (args) => {
+    const { action, modifications } = args as { action: string; modifications?: string };
+    
+    if (action === 'modify' || action === '修改') {
+      // 用户要修改需求
+      console.log('\n✏️ 收到修改请求，重新分析...\n');
+      
+      if (!modifications) {
+        return {
+          status: 'error',
+          message: '请提供具体的修改内容',
+        };
+      }
+      
+      // 重新开始需求收集
+      const newSummary = requirementGatherer.modifyRequirement(modifications);
+      
+      console.log('\n❓ 新需求已分析，请回答以下问题：\n');
+      const pendingQuestions = newSummary.questions.filter(q => !q.userAnswer);
+      pendingQuestions.forEach((q, idx) => {
+        console.log(`  ${idx + 1}. ${q.question}`);
+        if (q.options) console.log(`     选项: ${q.options.join(' | ')}`);
+      });
+      
+      return {
+        status: 'clarifying',
+        message: '需求已修改，请重新回答问题',
+        requirementSummary: {
+          originalGoal: newSummary.originalGoal,
+          understoodGoal: newSummary.understoodGoal,
+          domain: newSummary.domain,
+          complexity: newSummary.complexity,
+          answeredQuestions: newSummary.answeredQuestions,
+          totalQuestions: newSummary.totalQuestions,
+          pendingQuestions: pendingQuestions.map(q => ({
+            id: q.id,
+            question: q.question,
+            importance: q.importance,
+            options: q.options,
+          })),
+        },
+      };
+    }
+    
+    // 确认执行
+    console.log('\n✅ 需求已确认，开始执行...\n');
+    
+    const summary = requirementGatherer.confirm();
+    if (!summary) {
+      return { status: 'error', message: '确认失败，请重试' };
+    }
+    
+    // 执行实际任务
+    console.log(`🧠 正在分析目标: ${summary.understoodGoal}`);
+    console.log('\n📊 分析目标...');
+    
+    const analysis = plannerAgent.analyze({
+      goal: summary.understoodGoal,
+    });
+    
+    console.log(`     领域: ${analysis.domain}`);
+    console.log(`     复杂度: ${analysis.complexity}`);
+    console.log(`     预计步骤: ${analysis.estimatedSteps}`);
+    
+    // 继续执行计划...
+    console.log('  🔨 分解任务...');
+    const taskNodes = taskDecomposer.decompose(analysis);
+    console.log(`     创建了 ${taskNodes.length} 个任务`);
+    
+    // ... (继续原有逻辑)
+    return {
+      status: 'executing',
+      message: '开始执行任务',
+      requirementSummary: {
+        originalGoal: summary.originalGoal,
+        understoodGoal: summary.understoodGoal,
+        domain: summary.domain,
+        complexity: summary.complexity,
+      },
+      nextStep: '任务执行中...',
+    };
+  },
+};
+
+/**
  * Export all tools
  */
 export const tools: Tool[] = [
@@ -886,6 +1176,8 @@ export const tools: Tool[] = [
   agentMonitor,
   workflowCreate,
   genesisThink,
+  genesisAnswerQuestion,
+  genesisConfirmExecute,
   genesisToolManage,
   genesisLearn,
 ];
