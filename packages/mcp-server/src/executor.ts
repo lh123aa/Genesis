@@ -48,6 +48,7 @@ import { knowledgeBase } from './learning/knowledge.js';
 import { planTaskWithTools, detectResearchTopic, getResearchQueries, type ResearchQuery } from './tool-executor.js';
 import { autoImprovementEngine } from './learning/auto-improvement.js';
 import { selfEvaluationEngine } from './learning/self-evaluation.js';
+import { thinkingEngine, type ThinkingMode } from './thinking/engine.js';
 
 // Colors for console output
 const colors = {
@@ -216,15 +217,21 @@ export async function executeWithVisualization(goal: string, options?: {
   verbose?: boolean;
   mode?: 'serial' | 'parallel' | 'batch' | 'priority';
   batchSize?: number;
+  thinkingMode?: ThinkingMode;  // 思维模式
 }): Promise<{
   success: boolean;
   analysis: any;
   tasks: any[];
   workflow: any;
   duration: number;
+  thinking?: any;  // 思维过程数据
 }> {
   const startTime = Date.now();
   const showThinking = options?.showThinking ?? true;
+  const thinkingMode = options?.thinkingMode || 'react';
+  
+  // 启动思维引擎
+  thinkingEngine.startThinking(goal, thinkingMode);
   
   // ═══════════════════════════════════════════════════════════
   // PHASE 1: Goal Received
@@ -237,6 +244,12 @@ export async function executeWithVisualization(goal: string, options?: {
   // ═══════════════════════════════════════════════════════════
   await printLoading('正在分析目标...', 800);
   const analysis = deepAnalyze(goal);
+  
+  // 思维推理: 分析目标
+  thinkingEngine.reason(`分析目标: "${goal}"`);
+  thinkingEngine.reason(`识别领域: ${analysis.domain}, 复杂度: ${analysis.complexity}`);
+  thinkingEngine.act(`制定方法: ${analysis.suggestedApproach}`);
+  
   printAnalysis({
     domain: analysis.domain,
     complexity: analysis.complexity,
@@ -248,8 +261,13 @@ export async function executeWithVisualization(goal: string, options?: {
   // PHASE 3: Danger Detection
   // ═══════════════════════════════════════════════════════════
   const dangerCheck = detectDangerousOperations(goal);
+  
+  // 思维观察: 危险检测结果
   if (dangerCheck.isDangerous) {
+    thinkingEngine.observe(`⚠️ 检测到危险操作: ${dangerCheck.warnings.join(', ')}`);
     printDangerWarning(dangerCheck.warnings, dangerCheck.severity);
+  } else {
+    thinkingEngine.observe('✅ 安全检查通过');
   }
   
   // ═══════════════════════════════════════════════════════════
@@ -257,6 +275,13 @@ export async function executeWithVisualization(goal: string, options?: {
   // ═══════════════════════════════════════════════════════════
   await printLoading('正在分解任务...', 600);
   const tasks = await smartDecompose(analysis, goal);
+  
+  // 思维推理: 任务分解
+  thinkingEngine.reason(`任务分解完成: 共 ${tasks.length} 个子任务`);
+  tasks.forEach((t: any, idx: number) => {
+    thinkingEngine.act(`  ${idx + 1}. [${t.agentType}] ${t.name}`);
+  });
+  
   printTaskDecomposition(tasks.map((t: any) => ({
     id: t.id,
     name: t.name,
@@ -275,10 +300,18 @@ export async function executeWithVisualization(goal: string, options?: {
     agentType: t.agentType,
   })));
   
+  // 思维规划: Agent分配
+  const agentTypes = [...new Set(tasks.map((t: any) => t.agentType))];
+  thinkingEngine.plan(agentTypes);
+  
   // ═══════════════════════════════════════════════════════════
   // PHASE 6: Tool Detection
   // ═══════════════════════════════════════════════════════════
   const detection = toolDetector.detectAll(analysis, tasks);
+  
+  // 思维观察: 工具检测
+  thinkingEngine.observe(`需要工具: ${detection.requiredTools.length}个, 缺失: ${detection.missingTools.length}个`);
+  
   printToolDetection(
     detection.requiredTools.length,
     detection.missingTools.length,
@@ -312,6 +345,10 @@ export async function executeWithVisualization(goal: string, options?: {
   // ═══════════════════════════════════════════════════════════
   const workflow = workflowGenerator.generateWorkflow(goal, tasks);
   const prediction = optimizer.predictSuccess({ goal, analysis, tasks, workflow });
+  
+  // 思维推理: 成功预测
+  thinkingEngine.reason(`成功概率: ${prediction.probability}%, 因素: ${prediction.factors.join(', ')}`);
+  
   printSuccessPrediction(prediction.probability, prediction.factors);
   
   const recommendations = optimizer.getRecommendations(goal, analysis.domain);
@@ -327,8 +364,15 @@ export async function executeWithVisualization(goal: string, options?: {
   const completedResults = new Map<string, string>();
   const executionMode = options?.mode || 'parallel';
   
+  // 思维规划: 执行模式选择
+  thinkingEngine.act(`执行模式: ${executionMode}, 共 ${tasks.length} 个任务`);
+  
   if (options?.autoExecute) {
     printExecutionHeader();
+    
+    // 思维推理: 开始执行
+    thinkingEngine.reason('开始执行任务...');
+    
     // 根据模式执行任务
     completedCount = await executeTasksByMode(
       tasks, 
@@ -337,8 +381,19 @@ export async function executeWithVisualization(goal: string, options?: {
       executionMode,
       { batchSize: options?.batchSize }
     );
+    
+    // 思维观察: 执行结果
+    thinkingEngine.observe(`完成: ${completedCount}/${tasks.length} 个任务`);
+    
+    // 思维反思: 反思执行结果
+    if (completedCount === tasks.length) {
+      thinkingEngine.reflect('所有任务执行成功!');
+    } else {
+      thinkingEngine.reflect(`有 ${tasks.length - completedCount} 个任务未完成`);
+    }
   } else {
     printExecutionProgress(0, tasks.length);
+    thinkingEngine.observe('等待手动执行...');
     console.log(`   ${colors.yellow}⏳${'\x1b[0m'} ${colors.dim}Execution pending - add --execute to run${'\x1b[0m'}`);
   }
   
@@ -359,12 +414,21 @@ export async function executeWithVisualization(goal: string, options?: {
     success: completedCount === tasks.length,
   });
   
+  // 显示思维过程 (如果启用)
+  if (showThinking) {
+    thinkingEngine.printThinking();
+  }
+  
+  // 结束思维过程
+  const thinkingResult = thinkingEngine.endThinking();
+  
   return {
     success: true,
     analysis,
     tasks,
     workflow,
     duration: Date.now() - startTime,
+    thinking: thinkingResult,
   };
 }
 
