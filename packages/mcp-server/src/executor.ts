@@ -46,6 +46,8 @@ import { toolDetector } from './tools/detector.js';
 import { optimizer } from './learning/optimizer.js';
 import { knowledgeBase } from './learning/knowledge.js';
 import { planTaskWithTools, detectResearchTopic, getResearchQueries, type ResearchQuery } from './tool-executor.js';
+import { autoImprovementEngine } from './learning/auto-improvement.js';
+import { selfEvaluationEngine } from './learning/self-evaluation.js';
 
 // Colors for console output
 const colors = {
@@ -694,5 +696,84 @@ async function executeTasksParallel(
   console.log(analysisReport);
   saveExecutionAnalysis(analysisReport);
   
+  // 执行完成后自动触发评估和升级检查
+  await runPostTaskEvaluation(goal, completed, executionOrder.length);
+  
   return completed;
+}
+
+/**
+ * 任务完成后自动评估系统
+ * 分析本次执行，提出系统升级要求
+ */
+async function runPostTaskEvaluation(goal: string, completedTasks: number, totalTasks: number): Promise<void> {
+  console.log('\n' + '═'.repeat(65));
+  console.log('🎯 任务完成 - 正在运行系统评估...');
+  console.log('═'.repeat(65) + '\n');
+  
+  try {
+    // 1. 运行自我评估
+    const report = await selfEvaluationEngine.runFullEvaluation();
+    
+    // 2. 打印评估结果
+    selfEvaluationEngine.printReport(report);
+    
+    // 3. 如果有低分维度，生成升级要求
+    const lowScoreDimensions = report.dimensions.filter(d => d.score < 70);
+    
+    if (lowScoreDimensions.length > 0) {
+      console.log('\n' + '═'.repeat(65));
+      console.log('⚡ 系统升级要求');
+      console.log('═'.repeat(65) + '\n');
+      
+      lowScoreDimensions.forEach(dim => {
+        const dimensionNames: Record<string, string> = {
+          functionality: '功能完整性',
+          performance: '性能',
+          user_satisfaction: '用户满意度',
+          code_quality: '代码质量',
+          learning: '学习能力',
+          reliability: '可靠性',
+          maintainability: '可维护性',
+        };
+        
+        const name = dimensionNames[dim.dimension] || dim.dimension;
+        
+        console.log(`\n📌 ${name} (当前: ${dim.score}分 - ${dim.level})`);
+        console.log('   发现的问题:');
+        dim.findings.slice(0, 3).forEach((finding, idx) => {
+          console.log(`     ${idx + 1}. ${finding}`);
+        });
+        
+        if (dim.recommendations.length > 0) {
+          console.log('   升级要求:');
+          dim.recommendations.forEach((rec, idx) => {
+            console.log(`     🔧 ${idx + 1}. ${rec}`);
+          });
+        }
+      });
+      
+      console.log('\n' + '═'.repeat(65));
+    } else {
+      console.log('\n✅ 系统状态良好，无需升级');
+      console.log('═'.repeat(65) + '\n');
+    }
+    
+    // 4. 显示性能仪表盘
+    autoImprovementEngine.showPerformanceDashboard();
+    
+    // 5. 建议改进项
+    const pending = autoImprovementEngine.getPendingImprovements();
+    if (pending.length > 0) {
+      console.log('\n💡 待处理改进项:');
+      pending.slice(0, 3).forEach((imp, idx) => {
+        console.log(`   ${idx + 1}. ${imp.action} (置信度: ${imp.confidence}%)`);
+      });
+    }
+    
+  } catch (error) {
+    console.log('\n⚠️ 评估过程遇到问题:', error);
+  }
+  
+  console.log('\n');
 }
