@@ -62,11 +62,11 @@ const colors = {
 
 // Simulated results for different task types
 const taskResults: Record<string, string> = {
-  'scout': 'Research completed. Found key insights and data points.',
-  'coder': 'Implementation done. Code follows best practices.',
-  'tester': 'Testing complete. All tests passed.',
-  'reviewer': 'Review done. Quality checks passed.',
-  'docs': 'Documentation created. Clear and comprehensive.',
+  'scout': '研究完成。找到关键见解和数据点。',
+  'coder': '实现完成。代码遵循最佳实践。',
+  'tester': '测试完成。所有测试通过。',
+  'reviewer': '评审完成。质量检查通过。',
+  'docs': '文档已创建。清晰且全面。',
 };
 
 /**
@@ -79,7 +79,7 @@ function generateAgentThinking(agentType: string, task: any, goal: string, allTa
       `正在分解研究范围: ${goal}`,
       `正在识别关键信息源和数据点`,
       `正在检查 ${task.dependencies?.length || 0} 个任务依赖`,
-      '正在综合 findings 并准备总结',
+      '正在综合研究结果并准备总结',
     ],
     coder: [
       `正在规划实现: "${task.name}"`,

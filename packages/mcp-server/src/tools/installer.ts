@@ -400,9 +400,9 @@ export class ToolInstaller {
     lines.push('\n' + '='.repeat(50));
     
     if (batchResult.overallSuccess) {
-      lines.push('✨ Installation process completed');
+      lines.push('✨ 安装过程已完成');
     } else {
-      lines.push('⚠️  Some installations require manual intervention');
+      lines.push('⚠️  部分安装需要手动处理');
     }
 
     return lines.join('\n');

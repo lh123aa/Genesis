@@ -140,7 +140,7 @@ export class Optimizer {
           confidence: 75,
         });
 
-        reasoning.push(`Found ${completedSimilar.length} similar completed executions with average duration of ${Math.round(avgActual)} minutes`);
+        reasoning.push(`发现 ${completedSimilar.length} 个相似的已完成执行，平均耗时 ${Math.round(avgActual)} 分钟`);
 
         return { changes, reasoning, newEstimate: Math.round(avgActual) };
       }
@@ -306,7 +306,7 @@ export class Optimizer {
     if (similar.length > 0) {
       const successful = similar.filter(s => s.execution.status === 'completed');
       if (successful.length > 0) {
-        recommendations.push(`💡 ${successful.length} similar tasks completed successfully in the past`);
+        recommendations.push(`💡 过去有 ${successful.length} 个相似任务成功完成`);
         
         // Extract learnings
         for (const record of successful) {

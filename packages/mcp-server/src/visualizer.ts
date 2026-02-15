@@ -273,9 +273,9 @@ export function printExecutionProgress(completed: number, total: number, duratio
   const progressBar = colors.gradient.secondary + '█'.repeat(filled) + colors.dim + '░'.repeat(empty) + colors.reset;
   
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright}⚡ Execution Progress${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright}⚡ 执行进度${colors.reset}`);
   console.log(`${colors.gradient.primary}│${colors.reset}   ${progressBar} ${colors.white}${percentage}%${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}Completed:${colors.reset} ${colors.white}${completed}/${total}${colors.reset}${duration ? ' ' + colors.dim + `(${duration}ms)` + colors.reset : ''}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}已完成:${colors.reset} ${colors.white}${completed}/${total}${colors.reset}${duration ? ' ' + colors.dim + `(${duration}毫秒)` + colors.reset : ''}`);
   console.log(`${colors.gradient.primary}└─────────────────────────────────────────────────────┘${colors.reset}`);
   console.log('');
 }
@@ -345,7 +345,7 @@ export function printSummaryReport(results: {
   console.log(colors.gradient.primary + '█' + ' '.repeat(68) + '█' + colors.reset);
   
   // Title
-  const title = `${successIcon} Execution Summary`;
+  const title = `${successIcon} 执行总结`;
   const titlePadding = Math.floor((70 - 4 - title.length) / 2);
   console.log(colors.gradient.primary + '█' + ' '.repeat(titlePadding) + colors.bright + successColor + title + colors.reset + colors.gradient.primary + ' '.repeat(70 - 4 - title.length - titlePadding) + '█' + colors.reset);
   
@@ -752,7 +752,7 @@ export function printTaskTransfer(
   
   console.log('');
   console.log(`${colors.gradient.purple}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${colors.reset}`);
-  console.log(`${colors.gradient.purple}┃${colors.reset} ${colors.bright}🔄 Task Transfer${colors.bright}                                 ${colors.gradient.purple}┃${colors.reset}`);
+  console.log(`${colors.gradient.purple}┃${colors.reset} ${colors.bright}🔄 任务传递${colors.bright}                                 ${colors.gradient.purple}┃${colors.reset}`);
   console.log(`${colors.gradient.purple}┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩${colors.reset}`);
   console.log(`${colors.gradient.purple}│${colors.reset} ${fromConfig.color}${fromConfig.emoji} @${fromConfig.name}${colors.reset} ${colors.dim}→${colors.reset} ${toConfig.color}${toConfig.emoji} @${toConfig.name}${colors.reset}${' '.repeat(35)}│${colors.reset}`);
   console.log(`${colors.gradient.purple}│${colors.reset} ${colors.white}Task:${colors.reset} ${taskName}${' '.repeat(44 - taskName.length)}│${colors.reset}`);
@@ -773,7 +773,7 @@ export function printAgentTimeline(events: Array<{
   if (events.length === 0) return;
   
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright + colors.cyan}📜 Agent Activity Timeline${colors.reset}                           ${colors.gradient.primary}│${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.bright + colors.cyan}📜 Agent 活动时间线${colors.reset}                           ${colors.gradient.primary}│${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
   
   // Show last 5 events

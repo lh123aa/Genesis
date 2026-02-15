@@ -387,7 +387,7 @@ export class AgentREPL {
       const shouldAutoExecute = wantsExecution || (isSimple && analysis.complexity === 'simple');
       
       if (shouldAutoExecute) {
-        console.log('\n  🚀 Auto-executing (simple task detected)...\n');
+        console.log('\n  🚀 自动执行中 (检测到简单任务)...\n');
         await this.executeTask(goal);
       } else {
         // Show summary and ask for confirmation
@@ -601,13 +601,13 @@ Or type "/help" for available commands.`);
       recent.forEach((exec, i) => {
         const status = exec.execution.status === 'completed' ? `${this.green}✓${this.reset}` :
                       exec.execution.status === 'failed' ? `${this.red}✗${this.reset}` : `${this.gray}○${this.reset}`;
-        const statusText = exec.execution.status === 'completed' ? `${this.green}completed${this.reset}` :
-                          exec.execution.status === 'failed' ? `${this.red}failed${this.reset}` : `${this.gray}in-progress${this.reset}`;
+        const statusText = exec.execution.status === 'completed' ? `${this.green}已完成${this.reset}` :
+                          exec.execution.status === 'failed' ? `${this.red}失败${this.reset}` : `${this.gray}进行中${this.reset}`;
         
         console.log(`${this.gold}║  ${this.cyan}${i + 1}.${this.reset} ${status} ${this.white}${exec.goal.substring(0, 45)}${exec.goal.length > 45 ? '...' : ''}${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
-        console.log(`${this.gold}║     ${this.gray}Domain: ${exec.analysis.domain} │ Status: ${statusText}${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
+        console.log(`${this.gold}║     ${this.gray}领域: ${exec.analysis.domain} │ 状态: ${statusText}${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
         if (exec.execution.actualDuration) {
-          console.log(`${this.gold}║     ${this.gray}Duration: ${exec.execution.actualDuration} min${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
+          console.log(`${this.gold}║     ${this.gray}耗时: ${exec.execution.actualDuration} 分钟${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
         }
       });
     }
@@ -700,7 +700,7 @@ Or type "/help" for available commands.`);
     console.log(`${this.gold}║  ${this.white}Session Summary:${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
     console.log(`${this.gold}║     ${this.cyan}▸${this.reset} ${this.white}Duration:${this.reset} ${this.gray}${duration} minutes${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
     console.log(`${this.gold}║     ${this.cyan}▸${this.reset} ${this.white}Messages:${this.reset} ${this.gray}${conversations} messages${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
-    console.log(`${this.gold}║     ${this.cyan}▸${this.reset} ${this.white}Tasks Completed:${this.reset} ${this.gray}${this.context.tasksCompleted || 0}${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
+        console.log(`${this.gold}║     ${this.cyan}▸${this.reset} ${this.white}已完成任务:${this.reset} ${this.gray}${this.context.tasksCompleted || 0}${this.reset}`.padEnd(width - 2) + `${this.gold}║${this.reset}`);
     
     console.log(`${this.gold}${border}${this.reset}`);
     console.log(`${this.gold}║                                                                             ${this.gold}║${this.reset}`);
@@ -737,7 +737,7 @@ Or type "/help" for available commands.`);
       // Execute each task
       let completed = 0;
       for (const task of tasks) {
-        this.say(`\n📋 Task ${completed + 1}/${tasks.length}: [${task.agentType.toUpperCase()}] ${task.name}`);
+        this.say(`\n📋 任务 ${completed + 1}/${tasks.length}: [${task.agentType.toUpperCase()}] ${task.name}`);
         
         // Simulate task execution (in real implementation, this would call actual agents)
         await this.simulateTaskExecution(task);
@@ -746,7 +746,7 @@ Or type "/help" for available commands.`);
         this.context.tasksCompleted = (this.context.tasksCompleted || 0) + 1;
       }
       
-      this.say(`\n✅ Execution complete! ${completed} tasks finished.`);
+      this.say(`\n✅ 执行完成! ${completed} 个任务已完成.`);
       
       // Learning: Track successful execution
       // In full implementation, would call executionHistory.recordExecution()

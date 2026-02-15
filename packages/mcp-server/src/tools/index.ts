@@ -314,7 +314,7 @@ The tool returns a complete plan with analysis, task breakdown, tool requirement
   handler: async (args) => {
     const parsed = ThinkSchema.parse(args);
     
-    console.log(`🧠 Genesis is thinking about: ${parsed.goal}`);
+    console.log(`🧠 Genesis 正在思考: ${parsed.goal}`);
     
     try {
       // Step 1: Analyze the goal
@@ -366,7 +366,7 @@ The tool returns a complete plan with analysis, task breakdown, tool requirement
       // Step 8: Auto-execute if requested
       let executionResult = null;
       if (parsed.autoExecute) {
-        console.log('  🚀 Auto-executing workflow...');
+        console.log('  🚀 自动执行工作流...');
         executionResult = await agentOrchestrate.handler({
           workflowId: workflow.id,
           parallel: true,
