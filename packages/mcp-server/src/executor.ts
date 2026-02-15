@@ -49,6 +49,7 @@ import { planTaskWithTools, detectResearchTopic, getResearchQueries, type Resear
 import { autoImprovementEngine } from './learning/auto-improvement.js';
 import { selfEvaluationEngine } from './learning/self-evaluation.js';
 import { thinkingEngine, type ThinkingMode } from './thinking/engine.js';
+import { hooksSystem, type HookContext, type HookPhase } from './hooks/system.js';
 
 // Colors for console output
 const colors = {
@@ -230,6 +231,23 @@ export async function executeWithVisualization(goal: string, options?: {
   const showThinking = options?.showThinking ?? true;
   const thinkingMode = options?.thinkingMode || 'react';
   
+  // 初始化 Hooks 上下文
+  const sessionId = `session_${Date.now()}`;
+  const hookContext: HookContext = {
+    goal,
+    phase: 'initialization',
+    trigger: 'before',
+    data: {},
+    metadata: {
+      startTime,
+      currentTime: startTime,
+      sessionId,
+    },
+  };
+  
+  // 执行初始化阶段 hooks
+  await hooksSystem.execute('initialization', 'before', hookContext);
+  
   // 启动思维引擎
   thinkingEngine.startThinking(goal, thinkingMode);
   
@@ -256,6 +274,13 @@ export async function executeWithVisualization(goal: string, options?: {
     estimatedSteps: analysis.estimatedSteps,
     suggestedApproach: analysis.suggestedApproach,
   });
+  
+  // Hook: 分析阶段完成
+  hookContext.phase = 'analysis';
+  hookContext.trigger = 'after';
+  hookContext.data.analysis = analysis;
+  hookContext.metadata.currentTime = Date.now();
+  await hooksSystem.execute('analysis', 'after', hookContext);
   
   // ═══════════════════════════════════════════════════════════
   // PHASE 3: Danger Detection
@@ -290,6 +315,13 @@ export async function executeWithVisualization(goal: string, options?: {
     dependencies: t.dependencies,
     priority: t.priority,
   })));
+  
+  // Hook: 规划阶段完成
+  hookContext.phase = 'planning';
+  hookContext.trigger = 'after';
+  hookContext.data.tasks = tasks;
+  hookContext.metadata.currentTime = Date.now();
+  await hooksSystem.execute('planning', 'after', hookContext);
   
   // ═══════════════════════════════════════════════════════════
   // PHASE 5: Agent Assignment
@@ -391,6 +423,14 @@ export async function executeWithVisualization(goal: string, options?: {
     } else {
       thinkingEngine.reflect(`有 ${tasks.length - completedCount} 个任务未完成`);
     }
+    
+    // Hook: 执行阶段完成
+    hookContext.phase = 'execution';
+    hookContext.trigger = 'after';
+    hookContext.data.completedTasks = completedCount;
+    hookContext.data.totalTasks = tasks.length;
+    hookContext.metadata.currentTime = Date.now();
+    await hooksSystem.execute('execution', 'after', hookContext);
   } else {
     printExecutionProgress(0, tasks.length);
     thinkingEngine.observe('等待手动执行...');
@@ -413,6 +453,16 @@ export async function executeWithVisualization(goal: string, options?: {
     agentsUsed,
     success: completedCount === tasks.length,
   });
+  
+  // Hook: 完成阶段
+  hookContext.phase = 'completion';
+  hookContext.trigger = 'after';
+  hookContext.data.executionData = {
+    duration: Date.now() - startTime,
+    success: completedCount === tasks.length,
+  };
+  hookContext.metadata.currentTime = Date.now();
+  await hooksSystem.execute('completion', 'after', hookContext);
   
   // 显示思维过程 (如果启用)
   if (showThinking) {
