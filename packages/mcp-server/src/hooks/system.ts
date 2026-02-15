@@ -6,6 +6,7 @@
  */
 
 import { contextMonitor, getContextStats, shouldCompact, compactContext, getContextReport } from './context-monitor.js';
+import { sessionManager, printSessionStatus, getSessionReport } from './session-manager.js';
 
 // ANSI 颜色定义
 const colors = {
@@ -411,6 +412,125 @@ function createErrorHandler(): Hook {
       if (data.error) {
         console.log(`${colors.red}🚨 执行出错: ${data.error.message}${colors.reset}`);
         console.log(`${colors.dim}   错误详情: ${data.error.stack}${colors.reset}`);
+        
+        // 记录错误到会话
+        sessionManager.recordError(data.error.message, data.error.stack);
+      }
+    },
+  };
+}
+
+/**
+ * 会话创建 Hook
+ */
+function createSessionHook(): Hook {
+  return {
+    name: 'session-manager',
+    description: '会话创建和管理',
+    trigger: 'before',
+    phase: 'initialization',
+    priority: 5,
+    enabled: true,
+    handler: async (context) => {
+      // 创建新会话
+      sessionManager.createSession(context.goal, 'initialization');
+      sessionManager.createCheckpoint('init', '系统初始化');
+    },
+  };
+}
+
+/**
+ * 会话恢复 Hook
+ */
+function createSessionRecoveryHook(): Hook {
+  return {
+    name: 'session-recovery',
+    description: '会话恢复 - 从中断中恢复',
+    trigger: 'before',
+    phase: 'initialization',
+    priority: 10,
+    enabled: true,
+    handler: async (context) => {
+      // 检查是否有可恢复的会话
+      const recentSessions = sessionManager.getRecentSessions(3);
+      const interrupted = recentSessions.find(s => s.status === 'interrupted');
+      
+      if (interrupted) {
+        console.log(`${colors.yellow}📂 发现中断的会话: ${interrupted.id}${colors.reset}`);
+        const recovered = sessionManager.recoverSession(interrupted.id);
+        
+        if (recovered) {
+          console.log(`${colors.green}✅ 已恢复会话，可继续执行${colors.reset}`);
+          console.log(getSessionReport());
+        }
+      }
+    },
+  };
+}
+
+/**
+ * 会话进度跟踪 Hook
+ */
+function createProgressTrackingHook(): Hook {
+  return {
+    name: 'progress-tracking',
+    description: '跟踪任务执行进度',
+    trigger: 'after',
+    phase: 'planning',
+    priority: 20,
+    enabled: true,
+    handler: async (context) => {
+      if (context.data.tasks) {
+        sessionManager.updateProgress(context.data.tasks.length, 0);
+        sessionManager.createCheckpoint('planning', `规划完成: ${context.data.tasks.length} 个任务`);
+      }
+    },
+  };
+}
+
+/**
+ * 会话状态显示 Hook
+ */
+function createSessionStatusHook(): Hook {
+  return {
+    name: 'session-status',
+    description: '显示会话状态',
+    trigger: 'after',
+    phase: 'execution',
+    priority: 100,
+    enabled: true,
+    handler: async (context) => {
+      if (context.data.completedTasks !== undefined && context.data.totalTasks !== undefined) {
+        sessionManager.updateProgress(context.data.totalTasks, context.data.completedTasks);
+        sessionManager.printStatus();
+      }
+    },
+  };
+}
+
+/**
+ * 会话完成 Hook
+ */
+function createSessionCompletionHook(): Hook {
+  return {
+    name: 'session-completion',
+    description: '会话完成处理',
+    trigger: 'after',
+    phase: 'completion',
+    priority: 10,
+    enabled: true,
+    handler: async (context) => {
+      const session = sessionManager.getCurrentSession();
+      if (session) {
+        const success = context.data.executionData?.success;
+        
+        if (success) {
+          sessionManager.completeSession();
+        } else {
+          sessionManager.interruptSession('执行未完全成功');
+        }
+        
+        console.log(getSessionReport());
       }
     },
   };
@@ -513,6 +633,13 @@ export function createHooksSystem(): HookExecutor {
   executor.register(createAnalysisCompleteHook());
   executor.register(createPlanningCompleteHook());
   executor.register(createExecutionCompleteHook());
+  
+  // 注册会话管理 Hooks
+  executor.register(createSessionHook());
+  executor.register(createSessionRecoveryHook());
+  executor.register(createProgressTrackingHook());
+  executor.register(createSessionStatusHook());
+  executor.register(createSessionCompletionHook());
   
   return executor;
 }
