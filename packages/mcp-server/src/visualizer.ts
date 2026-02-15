@@ -795,3 +795,195 @@ export function printAgentTimeline(events: Array<{
   console.log(`${colors.gradient.primary}└─────────────────────────────────────────────────────┘${colors.reset}`);
   console.log('');
 }
+
+// ============================================================================
+// 自我迭代与性能监控
+// ============================================================================
+
+/**
+ * 实时性能指标数据
+ */
+export interface PerformanceMetrics {
+  totalTasks: number;
+  completedTasks: number;
+  failedTasks: number;
+  averageDuration: number;
+  successRate: number;
+  agentStats: Record<string, {
+    tasks: number;
+    success: number;
+    avgDuration: number;
+  }>;
+}
+
+/**
+ * 打印实时性能仪表盘 - 展示系统实时性能指标
+ */
+export function printPerformanceDashboard(metrics: PerformanceMetrics): void {
+  const successRate = metrics.totalTasks > 0 
+    ? ((metrics.completedTasks / metrics.totalTasks) * 100).toFixed(1)
+    : '0.0';
+  
+  const successColor = parseFloat(successRate) >= 80 ? colors.green :
+                      parseFloat(successRate) >= 60 ? colors.yellow : colors.red;
+  
+  console.log('');
+  console.log(`${colors.gradient.primary}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${colors.reset}`);
+  console.log(`${colors.gradient.primary}┃${colors.reset} ${colors.bright + colors.cyan}📊 实时性能仪表盘${colors.reset}                       ${colors.gradient.primary}┃${colors.reset}`);
+  console.log(`${colors.gradient.primary}┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩${colors.reset}`);
+  
+  // 核心指标
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.white}任务统计:${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.green}✓${colors.reset} 已完成: ${colors.green}${metrics.completedTasks}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.red}✗${colors.reset} 失败: ${colors.red}${metrics.failedTasks}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.cyan}⏱️${colors.reset} 平均耗时: ${colors.white}${(metrics.averageDuration/1000).toFixed(1)}秒${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${successColor}📈 成功率: ${successColor}${successRate}%${colors.reset}`);
+  
+  // Agent 统计
+  console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.white}各 Agent 表现:${colors.reset}`);
+  
+  Object.entries(metrics.agentStats).forEach(([agentType, stat]) => {
+    const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
+    const agentSuccessRate = stat.tasks > 0 ? ((stat.success / stat.tasks) * 100).toFixed(1) : '0.0';
+    const agentSuccessColor = parseFloat(agentSuccessRate) >= 80 ? colors.green :
+                             parseFloat(agentSuccessRate) >= 60 ? colors.yellow : colors.red;
+    
+    console.log(`${colors.gradient.primary}│${colors.reset}   ${agent.color}${agent.emoji}${colors.reset} ${agent.name}: ${stat.tasks}任务/${agentSuccessColor}${agentSuccessRate}%成功`);
+  });
+  
+  console.log(`${colors.gradient.primary}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${colors.reset}`);
+  console.log('');
+}
+
+/**
+ * 打印自我改进状态
+ */
+export function printSelfImprovementStatus(
+  phase: 'analyzing' | 'learning' | 'optimizing' | 'applying' | 'complete' | 'error',
+  message: string,
+  progress?: number
+): void {
+  const phaseConfig = {
+    analyzing: { emoji: '🔍', color: colors.cyan, text: '分析中' },
+    learning: { emoji: '🧠', color: colors.magenta, text: '学习中' },
+    optimizing: { emoji: '⚙️', color: colors.yellow, text: '优化中' },
+    applying: { emoji: '🔧', color: colors.blue, text: '应用中' },
+    complete: { emoji: '✅', color: colors.green, text: '完成' },
+    error: { emoji: '❌', color: colors.red, text: '错误' },
+  };
+  
+  const config = phaseConfig[phase];
+  const progressBar = progress !== undefined 
+    ? `${colors.gradient.secondary}${'█'.repeat(Math.floor(progress/5))}${'░'.repeat(20-Math.floor(progress/5))}${colors.reset}`
+    : '';
+  
+  console.log(`${config.color}${config.emoji}${colors.reset} ${config.text}: ${colors.white}${message}${colors.reset}${progress !== undefined ? ' ' + progressBar + ' ' + progress + '%' : ''}`);
+}
+
+/**
+ * 打印系统健康检查
+ */
+export function printSystemHealthCheck(checks: Array<{
+  name: string;
+  status: 'ok' | 'warning' | 'error';
+  message: string;
+  details?: string;
+}>): void {
+  console.log('');
+  console.log(`${colors.gradient.primary}┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓${colors.reset}`);
+  console.log(`${colors.gradient.primary}┃${colors.reset} ${colors.bright + colors.green}🏥 系统健康检查${colors.reset}                           ${colors.gradient.primary}┃${colors.reset}`);
+  console.log(`${colors.gradient.primary}┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩${colors.reset}`);
+  
+  checks.forEach(check => {
+    const statusIcon = check.status === 'ok' ? '✓' : check.status === 'warning' ? '⚠' : '✗';
+    const statusColor = check.status === 'ok' ? colors.green : check.status === 'warning' ? colors.yellow : colors.red;
+    
+    console.log(`${colors.gradient.primary}│${colors.reset} ${statusColor}${statusIcon}${colors.reset} ${colors.white}${check.name}${colors.reset}: ${check.message}`);
+    if (check.details) {
+      console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}${check.details}${colors.reset}`);
+    }
+  });
+  
+  const okCount = checks.filter(c => c.status === 'ok').length;
+  const warnCount = checks.filter(c => c.status === 'warning').length;
+  const errorCount = checks.filter(c => c.status === 'error').length;
+  
+  console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${colors.green}正常: ${okCount}${colors.reset} ${colors.yellow}警告: ${warnCount}${colors.reset} ${colors.red}错误: ${errorCount}${colors.reset}`);
+  console.log(`${colors.gradient.primary}┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛${colors.reset}`);
+  console.log('');
+}
+
+/**
+ * 打印评估趋势图表
+ */
+export function printEvaluationTrend(
+  dimension: string,
+  scores: number[],
+  currentScore: number
+): void {
+  if (scores.length === 0) return;
+  
+  const min = Math.min(...scores);
+  const max = Math.max(...scores);
+  const range = max - min || 1;
+  
+  // 生成简单的柱状图
+  const chart = scores.map((score, idx) => {
+    const height = Math.round(((score - min) / range) * 5) + 1;
+    const bar = '▁▂▃▄▅▆▇'[height - 1] || '░';
+    const isCurrent = idx === scores.length - 1;
+    return isCurrent ? `${colors.gradient.primary}${bar}${colors.reset}` : colors.dim + bar + colors.reset;
+  }).join('');
+  
+  const trend = scores.length > 1 
+    ? (currentScore > scores[scores.length - 2] ? '📈' : currentScore < scores[scores.length - 2] ? '📉' : '➡️')
+    : '';
+  
+  console.log(`  ${colors.cyan}${dimension}:${colors.reset} ${chart} ${colors.white}${currentScore}分${trend}`);
+}
+
+/**
+ * 打印迭代升级报告
+ */
+export function printIterationReport(report: {
+  iteration: number;
+  changes: string[];
+  improvements: string[];
+  newCapabilities: string[];
+  nextSteps: string[];
+}): void {
+  console.log('');
+  console.log(colors.gradient.primary + '═'.repeat(65) + colors.reset);
+  console.log(colors.gradient.primary + '█' + ' '.repeat(20) + colors.bright + colors.white + '🚀 迭代升级报告' + ' '.repeat(19) + colors.gradient.primary + '█' + colors.reset);
+  console.log(colors.gradient.primary + '█' + ' '.repeat(63) + colors.gradient.primary + '█' + colors.reset);
+  console.log(colors.gradient.primary + '█' + colors.bright + ` 第 ${report.iteration} 次迭代` + colors.reset + colors.gradient.primary + ' '.repeat(43) + '█' + colors.reset);
+  console.log(colors.gradient.primary + '═'.repeat(65) + colors.reset);
+  
+  // 变更
+  if (report.changes.length > 0) {
+    console.log(`\n${colors.yellow}📝 本次变更:${colors.reset}`);
+    report.changes.forEach(c => console.log(`   • ${c}`));
+  }
+  
+  // 改进
+  if (report.improvements.length > 0) {
+    console.log(`\n${colors.green}✨ 改进提升:${colors.reset}`);
+    report.improvements.forEach(i => console.log(`   • ${i}`));
+  }
+  
+  // 新能力
+  if (report.newCapabilities.length > 0) {
+    console.log(`\n${colors.cyan}🆕 新增能力:${colors.reset}`);
+    report.newCapabilities.forEach(n => console.log(`   • ${n}`));
+  }
+  
+  // 下一步
+  if (report.nextSteps.length > 0) {
+    console.log(`\n${colors.magenta}🎯 下一步计划:${colors.reset}`);
+    report.nextSteps.forEach((n, idx) => console.log(`   ${idx + 1}. ${n}`));
+  }
+  
+  console.log('\n' + colors.gradient.primary + '═'.repeat(65) + colors.reset + '\n');
+}
