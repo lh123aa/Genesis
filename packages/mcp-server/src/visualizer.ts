@@ -45,13 +45,13 @@ const colors = {
   }
 };
 
-// Agent type emojis and colors
+// Agent type emojis and colors - 每个 Agent 有专属颜色
 const agentConfig = {
-  scout: { emoji: '🔍', color: colors.cyan, name: 'Scout', role: '研究探索' },
-  coder: { emoji: '💻', color: colors.green, name: 'Coder', role: '代码实现' },
-  tester: { emoji: '🧪', color: colors.blue, name: 'Tester', role: '测试验证' },
-  reviewer: { emoji: '👀', color: colors.yellow, name: 'Reviewer', role: '代码评审' },
-  docs: { emoji: '📝', color: colors.magenta, name: 'Docs', role: '文档编写' },
+  scout: { emoji: '🔍', color: colors.cyan, name: 'Scout', role: '研究探索', borderColor: '\x1b[38;2;0;212;255m' },
+  coder: { emoji: '💻', color: colors.green, name: 'Coder', role: '代码实现', borderColor: '\x1b[38;2;16;185;129m' },
+  tester: { emoji: '🧪', color: colors.blue, name: 'Tester', role: '测试验证', borderColor: '\x1b[38;2;59;130;246m' },
+  reviewer: { emoji: '👀', color: colors.yellow, name: 'Reviewer', role: '代码评审', borderColor: '\x1b[38;2;245;158;11m' },
+  docs: { emoji: '📝', color: colors.magenta, name: 'Docs', role: '文档编写', borderColor: '\x1b[38;2;139;92;246m' },
 };
 
 // Status icons
@@ -509,48 +509,53 @@ export function printKnowledge(entries: Array<{ title: string; content: string }
 }
 
 /**
- * Print task execution start - NEW FUNCTION
+ * Print task execution start - 使用 Agent 专属颜色
  */
 export function printTaskExecutionStart(taskId: string, taskName: string, agentType: string): void {
   const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
+  const borderColor = agent.borderColor || agent.color;
   
   console.log('');
-  console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} 【${agent.name}】开始执行任务${colors.reset}                      ${colors.gradient.primary}│${colors.reset}`);
-  console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}任务 ID: ${taskId}${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}任务: ${taskName}${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.blue}⚡ 正在执行...${colors.reset}`);
-  console.log(`${colors.gradient.primary}└─────────────────────────────────────────────────────┘${colors.reset}`);
+  console.log(`${borderColor}╭─────────────────────────────────────────────────────╮${colors.reset}`);
+  console.log(`${borderColor}│${colors.reset} ${agent.color}${agent.emoji} 【${agent.name}】开始执行任务${' '.repeat(20)}${borderColor}│${colors.reset}`);
+  console.log(`${borderColor}├─────────────────────────────────────────────────────┤${colors.reset}`);
+  console.log(`${borderColor}│${colors.reset}   ${colors.white}任务 ID: ${taskId}${' '.repeat(37)}${borderColor}│${colors.reset}`);
+  console.log(`${borderColor}│${colors.reset}   ${colors.white}任务: ${taskName}${' '.repeat(40)}${borderColor}│${colors.reset}`);
+  console.log(`${borderColor}│${colors.reset}   ${colors.blue}⚡ 正在执行...${' '.repeat(36)}${borderColor}│${colors.reset}`);
+  console.log(`${borderColor}╰─────────────────────────────────────────────────────╯${colors.reset}`);
   console.log('');
 }
 
 /**
- * Print task execution thinking - NEW FUNCTION
+ * Print task execution thinking - 使用 Agent 专属颜色
  */
 export function printTaskExecutionThinking(agentType: string, thoughts: string[]): void {
   const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
   
   thoughts.forEach((thought, index) => {
     const icon = index === 0 ? '🤔' : index === thoughts.length - 1 ? '💡' : '→';
-    console.log(`   ${agent.color}【${agent.name}】${colors.reset} ${colors.cyan}${icon}${colors.reset} ${colors.dim}${thought}${colors.reset}`);
+    // 使用 Agent 专属颜色显示名字，思考内容使用淡色
+    console.log(`   ${agent.color}╭─【${agent.name}】思考${'─'.repeat(40)}${colors.reset}`);
+    console.log(`   ${agent.color}│${colors.reset} ${agent.color}${icon}${colors.reset} ${colors.white}${thought}${colors.reset}`);
+    console.log(`   ${agent.color}╰${'─'.repeat(56)}${colors.reset}`);
   });
 }
 
 /**
- * Print task execution result - NEW FUNCTION
+ * Print task execution result - 使用 Agent 专属颜色
  */
 export function printTaskExecutionResult(taskId: string, taskName: string, agentType: string, result: string): void {
   const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
+  const borderColor = agent.borderColor || agent.color;
   
   console.log('');
-  console.log(`${colors.green}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.green}│${colors.reset} ${agent.color}${agent.emoji} 【${agent.name}】已完成任务${colors.reset}                          ${colors.green}│${colors.reset}`);
-  console.log(`${colors.green}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.green}│${colors.reset}   ${colors.white}任务 ID: ${taskId}${colors.reset}`);
-  console.log(`${colors.green}│${colors.reset}   ${colors.white}任务: ${taskName}${colors.reset}`);
-  console.log(`${colors.green}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.green}│${colors.reset}   ${colors.green}✓ 结果:${colors.reset}`);
+  console.log(`${borderColor}╭─────────────────────────────────────────────────────╮${colors.reset}`);
+  console.log(`${borderColor}│${colors.reset} ${agent.color}${agent.emoji} 【${agent.name}】已完成任务${' '.repeat(21)}${borderColor}│${colors.reset}`);
+  console.log(`${borderColor}├─────────────────────────────────────────────────────┤${colors.reset}`);
+  console.log(`${borderColor}│${colors.reset}   ${colors.white}任务 ID: ${taskId}${' '.repeat(37)}${borderColor}│${colors.reset}`);
+  console.log(`${borderColor}│${colors.reset}   ${colors.white}任务: ${taskName}${' '.repeat(40)}${borderColor}│${colors.reset}`);
+  console.log(`${borderColor}├─────────────────────────────────────────────────────┤${colors.reset}`);
+  console.log(`${borderColor}│${colors.reset}   ${agent.color}✓ 结果:${colors.reset}`);
   
   // Word wrap result
   const maxWidth = 60;
@@ -558,17 +563,17 @@ export function printTaskExecutionResult(taskId: string, taskName: string, agent
   let line = '';
   words.forEach(word => {
     if (line.length + word.length + 1 > maxWidth) {
-      console.log(`${colors.green}│${colors.reset}     ${colors.white}${line}${colors.reset}`);
+      console.log(`${borderColor}│${colors.reset}     ${colors.white}${line}${' '.repeat(maxWidth - line.length)}${borderColor}│${colors.reset}`);
       line = word;
     } else {
       line += (line ? ' ' : '') + word;
     }
   });
   if (line) {
-    console.log(`${colors.green}│${colors.reset}     ${colors.white}${line}${colors.reset}`);
+    console.log(`${borderColor}│${colors.reset}     ${colors.white}${line}${' '.repeat(maxWidth - line.length)}${borderColor}│${colors.reset}`);
   }
   
-  console.log(`${colors.green}└─────────────────────────────────────────────────────┘${colors.reset}`);
+  console.log(`${borderColor}╰─────────────────────────────────────────────────────╯${colors.reset}`);
   console.log('');
 }
 
@@ -707,17 +712,19 @@ export function printAgentCollaboration(
 }
 
 /**
- * Print a thinking bubble for an agent
+ * Print a thinking bubble for an agent - 使用 Agent 专属颜色边框
  */
 export function printAgentThinkingBubble(agentType: string, thought: string, step: number, total: number): void {
   const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
+  const borderColor = agent.borderColor || agent.color;
   
   // Progress indicator
   const progress = '●'.repeat(step) + '○'.repeat(total - step);
   
-  console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} 【${agent.name}】${colors.reset} ${colors.dim}思考中${colors.reset} ${colors.yellow}${progress}${colors.reset}`);
-  console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
+  // 使用 Agent 专属颜色的边框
+  console.log(`${borderColor}╭─────────────────────────────────────────────────────╮${colors.reset}`);
+  console.log(`${borderColor}│${colors.reset} ${agent.color}${agent.emoji} 【${agent.name}】${colors.reset} ${colors.dim}思考中${colors.reset} ${agent.color}${progress}${colors.reset}${borderColor}${' '.repeat(25)}${colors.reset}`);
+  console.log(`${borderColor}├─────────────────────────────────────────────────────┤${colors.reset}`);
   
   // Word wrap thought
   const maxWidth = 55;
@@ -725,17 +732,17 @@ export function printAgentThinkingBubble(agentType: string, thought: string, ste
   let line = '';
   words.forEach(word => {
     if (line.length + word.length + 1 > maxWidth) {
-      console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}${line}${colors.reset}`);
+      console.log(`${borderColor}│${colors.reset}   ${colors.white}${line}${colors.reset}`);
       line = word;
     } else {
       line += (line ? ' ' : '') + word;
     }
   });
   if (line) {
-    console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.white}${line}${colors.reset}`);
+    console.log(`${borderColor}│${colors.reset}   ${colors.white}${line}${colors.reset}`);
   }
   
-  console.log(`${colors.gradient.primary}└─────────────────────────────────────────────────────┘${colors.reset}`);
+  console.log(`${borderColor}╰─────────────────────────────────────────────────────╯${colors.reset}`);
 }
 
 /**
