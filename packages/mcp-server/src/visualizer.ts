@@ -56,12 +56,12 @@ const agentConfig = {
 
 // Status icons
 const statusIcons = {
-  pending: { emoji: '⏳', text: 'Pending', color: colors.yellow },
-  thinking: { emoji: '🤔', text: 'Thinking', color: colors.cyan },
-  working: { emoji: '⚡', text: 'Working', color: colors.blue },
-  completed: { emoji: '✅', text: 'Completed', color: colors.green },
-  failed: { emoji: '❌', text: 'Failed', color: colors.red },
-  waiting: { emoji: '🔄', text: 'Waiting', color: colors.dim },
+  pending: { emoji: '⏳', text: '等待中', color: colors.yellow },
+  thinking: { emoji: '🤔', text: '思考中', color: colors.cyan },
+  working: { emoji: '⚡', text: '工作中', color: colors.blue },
+  completed: { emoji: '✅', text: '已完成', color: colors.green },
+  failed: { emoji: '❌', text: '失败', color: colors.red },
+  waiting: { emoji: '🔄', text: '等待中', color: colors.dim },
 };
 
 /**
@@ -224,10 +224,10 @@ export function printAgentThinking(agentType: string, taskName: string, thoughts
   const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
   
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} ${colors.bright}${agent.name}${colors.reset} is thinking...                           ${colors.gradient.primary}│${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} ${colors.bright}${agent.name}${colors.reset} 正在思考中...                           ${colors.gradient.primary}│${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}Task:${colors.reset} ${colors.white}${taskName}${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}Thoughts:${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}任务:${colors.reset} ${colors.white}${taskName}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset}   ${colors.dim}思考过程:${colors.reset}`);
   
   thoughts.forEach((thought, index) => {
     const thoughtIcon = index === 0 ? '💭' : index === thoughts.length - 1 ? '✨' : '→';
@@ -245,7 +245,7 @@ export function printAgentWorking(agentType: string, taskName: string, progress?
   const agent = agentConfig[agentType as keyof typeof agentConfig] || agentConfig.coder;
   const status = statusIcons.working;
   
-  console.log(`${status.color}${status.emoji}${colors.reset} ${agent.color}${agent.name}${colors.reset} ${colors.dim}executing:${colors.reset} ${colors.white}${taskName}${colors.reset}${progress ? ' ' + colors.dim + progress + colors.reset : ''}`);
+  console.log(`${status.color}${status.emoji}${colors.reset} ${agent.color}${agent.name}${colors.reset} ${colors.dim}执行中:${colors.reset} ${colors.white}${taskName}${colors.reset}${progress ? ' ' + colors.dim + progress + colors.reset : ''}`);
 }
 
 /**
@@ -259,7 +259,7 @@ export function printTaskStatus(taskId: string, status: keyof typeof statusIcons
                  status === 'completed' ? '✅' :
                  status === 'failed' ? '❌' : '⏳';
   
-  console.log(`   ${statusInfo.color}${prefix}${colors.reset} ${colors.dim}Task ${taskId}:${colors.reset} ${statusInfo.color}${statusInfo.text}${colors.reset}${message ? ' ' + colors.dim + message + colors.reset : ''}`);
+  console.log(`   ${statusInfo.color}${prefix}${colors.reset} ${colors.dim}任务 ${taskId}:${colors.reset} ${statusInfo.color}${statusInfo.text}${colors.reset}${message ? ' ' + colors.dim + message + colors.reset : ''}`);
 }
 
 /**
@@ -545,12 +545,12 @@ export function printTaskExecutionResult(taskId: string, taskName: string, agent
   
   console.log('');
   console.log(`${colors.green}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.green}│${colors.reset} ${agent.color}${agent.emoji} ${colors.bright}${agent.name} completed${colors.reset}                           ${colors.green}│${colors.reset}`);
+  console.log(`${colors.green}│${colors.reset} ${agent.color}${agent.emoji} ${colors.bright}${agent.name} 已完成${colors.reset}                           ${colors.green}│${colors.reset}`);
   console.log(`${colors.green}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.green}│${colors.reset}   ${colors.white}Task ID: ${taskId}${colors.reset}`);
-  console.log(`${colors.green}│${colors.reset}   ${colors.white}Task: ${taskName}${colors.reset}`);
+  console.log(`${colors.green}│${colors.reset}   ${colors.white}任务 ID: ${taskId}${colors.reset}`);
+  console.log(`${colors.green}│${colors.reset}   ${colors.white}任务: ${taskName}${colors.reset}`);
   console.log(`${colors.green}├─────────────────────────────────────────────────────┤${colors.reset}`);
-  console.log(`${colors.green}│${colors.reset}   ${colors.green}✓ Result:${colors.reset}`);
+  console.log(`${colors.green}│${colors.reset}   ${colors.green}✓ 结果:${colors.reset}`);
   
   // Word wrap result
   const maxWidth = 60;
@@ -716,7 +716,7 @@ export function printAgentThinkingBubble(agentType: string, thought: string, ste
   const progress = '●'.repeat(step) + '○'.repeat(total - step);
   
   console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${colors.reset}`);
-  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} @${agent.name}${colors.reset} ${colors.dim}thinking${colors.reset} ${colors.yellow}${progress}${colors.reset}`);
+  console.log(`${colors.gradient.primary}│${colors.reset} ${agent.color}${agent.emoji} @${agent.name}${colors.reset} ${colors.dim}思考中${colors.reset} ${colors.yellow}${progress}${colors.reset}`);
   console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${colors.reset}`);
   
   // Word wrap thought
