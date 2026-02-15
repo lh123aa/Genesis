@@ -5,6 +5,8 @@
  * 提供可扩展的工作流自动化能力
  */
 
+import { contextMonitor, getContextStats, shouldCompact, compactContext, getContextReport } from './context-monitor.js';
+
 // ANSI 颜色定义
 const colors = {
   reset: '\x1b[0m',
@@ -13,6 +15,7 @@ const colors = {
   yellow: '\x1b[33m',
   cyan: '\x1b[36m',
   dim: '\x1b[2m',
+  bright: '\x1b[1m',
 };
 
 /**
@@ -261,25 +264,35 @@ function createTodoContinuationEnforcer(): Hook {
 }
 
 /**
- * 上下文窗口监控 Hook
+ * 上下文窗口监控 Hook - 增强版
  */
 function createContextWindowMonitor(): Hook {
   return {
     name: 'context-window-monitor',
-    description: '监控上下文窗口使用情况',
+    description: '监控上下文窗口使用情况，提供智能压缩建议',
     trigger: 'after',
     phase: 'execution',
     priority: 50,
     enabled: true,
     handler: async (context) => {
-      const { metadata } = context;
-      const elapsed = metadata.currentTime - metadata.startTime;
+      const stats = getContextStats();
+      const usage = stats.estimatedTotalTokens / 100000;
       
-      // 估算上下文使用（简单估算）
-      const estimatedTokens = Math.floor(elapsed / 100) * 50; // 粗略估算
+      // 使用新的上下文监控器
+      contextMonitor.addUserMessage(context.goal);
       
-      if (estimatedTokens > 50000) {
-        console.log(`${colors.yellow}⚠️ 上下文使用较高，建议保存进度${colors.reset}`);
+      if (context.data.tasks) {
+        contextMonitor.addAssistantMessage(`任务数: ${context.data.tasks.length}`);
+      }
+      
+      // 显示状态
+      contextMonitor.printStatus();
+      
+      // 如果需要压缩，给出建议
+      if (shouldCompact()) {
+        console.log(`${colors.yellow}💡 建议运行上下文压缩以避免溢出${colors.reset}`);
+        const suggestions = contextMonitor.getCompactionSuggestions();
+        suggestions.forEach(s => console.log(`   • ${s}`));
       }
     },
   };
@@ -326,6 +339,57 @@ function createTaskStatistics(): Hook {
       if (data.completedTasks !== undefined && data.totalTasks !== undefined) {
         const successRate = ((data.completedTasks / data.totalTasks) * 100).toFixed(1);
         console.log(`${colors.cyan}📊 任务完成率: ${successRate}%${colors.reset}`);
+      }
+    },
+  };
+}
+
+/**
+ * 预压缩 Hook - 借鉴 Oh My OpenCode
+ * 在上下文达到 85% 阈值前主动压缩
+ */
+function createPreemptiveCompactionHook(): Hook {
+  return {
+    name: 'preemptive-compaction',
+    description: '在上下文达到阈值前主动压缩，避免溢出',
+    trigger: 'after',
+    phase: 'execution',
+    priority: 40,  // 在 context-window-monitor 之前执行
+    enabled: true,
+    handler: async (context) => {
+      // 检查是否需要压缩
+      if (shouldCompact()) {
+        console.log(`${colors.yellow}⚠️ 上下文使用率过高，尝试自动压缩...${colors.reset}`);
+        
+        const result = compactContext();
+        
+        console.log(`${colors.green}✅ 压缩完成: 释放了 ~${result.freedTokens} tokens${colors.reset}`);
+        
+        // 打印压缩后的状态
+        contextMonitor.printStatus();
+      }
+    },
+  };
+}
+
+/**
+ * 工具输出截断 Hook
+ */
+function createToolOutputTruncatorHook(): Hook {
+  return {
+    name: 'tool-output-truncator',
+    description: '截断过大的工具输出以节省上下文空间',
+    trigger: 'after',
+    phase: 'execution',
+    priority: 60,
+    enabled: true,
+    handler: async (context) => {
+      const stats = getContextStats();
+      
+      // 如果工具调用太多，给出警告
+      if (stats.toolCallCount > 50) {
+        console.log(`${colors.yellow}⚠️ 工具调用较多 (${stats.toolCallCount})${colors.reset}`);
+        console.log(`${colors.dim}   建议: 考虑合并工具调用或使用批量操作${colors.reset}`);
       }
     },
   };
@@ -440,7 +504,9 @@ export function createHooksSystem(): HookExecutor {
   // 注册所有内置 Hooks
   executor.register(createInitializationHook());
   executor.register(createTodoContinuationEnforcer());
-  executor.register(createContextWindowMonitor());
+  executor.register(createPreemptiveCompactionHook());  // 新增: 预压缩
+  executor.register(createContextWindowMonitor());     // 增强: 上下文监控
+  executor.register(createToolOutputTruncatorHook());  // 新增: 工具输出截断
   executor.register(createExecutionTimeMonitor());
   executor.register(createTaskStatistics());
   executor.register(createErrorHandler());
