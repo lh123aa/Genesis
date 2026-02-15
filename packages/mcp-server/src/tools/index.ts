@@ -372,39 +372,39 @@ The tool returns a complete plan with analysis, task breakdown, tool requirement
     
     try {
       // Step 1: Analyze the goal
-      console.log('  📊 Analyzing goal...');
+      console.log('  📊 正在分析目标...');
       const analysis = plannerAgent.analyze({
         goal: parsed.goal,
         context: parsed.context,
       });
       
-      console.log(`     Domain: ${analysis.domain}`);
-      console.log(`     Complexity: ${analysis.complexity}`);
-      console.log(`     Estimated steps: ${analysis.estimatedSteps}`);
+      console.log(`     领域: ${analysis.domain}`);
+      console.log(`     复杂度: ${analysis.complexity}`);
+      console.log(`     预计步骤: ${analysis.estimatedSteps}`);
       
       // Step 2: Decompose into tasks
-      console.log('  🔨 Decomposing into tasks...');
+      console.log('  🔨 正在分解任务...');
       const taskNodes = taskDecomposer.decompose(analysis);
-      console.log(`     Created ${taskNodes.length} tasks`);
+      console.log(`     创建了 ${taskNodes.length} 个任务`);
       
       // Step 3: Detect required tools (Phase 3)
-      console.log('  🔍 Detecting required tools...');
+      console.log('  🔍 正在检测所需工具...');
       const toolDetection = toolDetector.detectAll(analysis, taskNodes);
-      console.log(`     Required: ${toolDetection.requiredTools.length} tools`);
-      console.log(`     Missing: ${toolDetection.missingTools.length} tools`);
-      console.log(`     Installed: ${toolDetection.installedTools.length} tools`);
+      console.log(`     需要: ${toolDetection.requiredTools.length} 个工具`);
+      console.log(`     缺失: ${toolDetection.missingTools.length} 个工具`);
+      console.log(`     已安装: ${toolDetection.installedTools.length} 个工具`);
       
       // Step 4: Check installation status
       const installPlan = toolDetector.generateInstallationPlan(toolDetection);
       if (!installPlan.canProceed && installPlan.manualInstallations.length > 0) {
-        console.log('  ⚠️  Some tools require manual installation');
+        console.log('  ⚠️  部分工具需要手动安装');
       }
       
       // Step 5: Generate workflow
-      console.log('  📋 Generating workflow...');
+      console.log('  📋 正在生成工作流...');
       const workflow = workflowGenerator.generateWorkflow(parsed.goal, taskNodes, {
         name: `auto-${analysis.domain}-${Date.now()}`,
-        description: `Auto-generated workflow for: ${parsed.goal}`,
+        description: `自动生成工作流: ${parsed.goal}`,
       });
       
       // Step 6: Generate complete plan
@@ -427,7 +427,7 @@ The tool returns a complete plan with analysis, task breakdown, tool requirement
         });
       }
       
-      console.log('  ✅ Planning complete!');
+      console.log('  ✅ 规划完成!');
       
       return {
         status: 'success',
@@ -486,11 +486,11 @@ The tool returns a complete plan with analysis, task breakdown, tool requirement
         ],
       };
     } catch (error) {
-      console.error('  ❌ Planning failed:', error);
+      console.error('  ❌ 规划失败:', error);
       return {
         status: 'error',
-        message: error instanceof Error ? error.message : 'Unknown error during planning',
-        suggestedNextSteps: ['Check goal description', 'Provide more context', 'Try breaking into smaller goals'],
+        message: error instanceof Error ? error.message : '规划过程中发生未知错误',
+        suggestedNextSteps: ['检查目标描述', '提供更多上下文', '尝试拆分为更小的目标'],
       };
     }
   },
@@ -596,7 +596,7 @@ Examples:
             };
           }
           
-          console.log(`🔍 Detecting tools needed for: ${goal}`);
+          console.log(`🔍 正在检测所需工具: ${goal}`);
           
           // Analyze and detect
           const analysis = plannerAgent.quickAnalyze(goal);
@@ -651,7 +651,7 @@ Examples:
             };
           }
           
-          console.log(`🔨 Generating tool for capability: ${capability}`);
+          console.log(`🔨 正在生成工具: ${capability}`);
           
           const request = toolGenerator.analyzeToolNeed(capability, goal);
           const result = toolGenerator.generateTool(request);
@@ -766,15 +766,15 @@ Examples:
     try {
       switch (action) {
         case 'analyze': {
-          console.log('🧠 Analyzing execution history...\n');
+          console.log('🧠 正在分析执行历史...\n');
           
           const learnings = learningEngine.analyzeHistory(domain);
           const stats = executionHistory.getStatistics();
           
-          console.log(`✅ Analysis complete!`);
-          console.log(`   Found ${learnings.length} new learnings`);
-          console.log(`   Total executions: ${stats.totalExecutions}`);
-          console.log(`   Overall success rate: ${stats.successRate.toFixed(1)}%`);
+          console.log(`✅ 分析完成!`);
+          console.log(`   发现 ${learnings.length} 条新学习`);
+          console.log(`   总执行次数: ${stats.totalExecutions}`);
+          console.log(`   总体成功率: ${stats.successRate.toFixed(1)}%`);
           
           return {
             status: 'success',

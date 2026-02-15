@@ -315,7 +315,7 @@ export class AgentREPL {
 
     try {
       // Step 1: Analyze
-      console.log('  📊 Analyzing...');
+      console.log('  📊 正在分析...');
       const analysis = plannerAgent.quickAnalyze(goal);
       console.log(`     Domain: ${analysis.domain}`);
       console.log(`     Complexity: ${analysis.complexity}`);
@@ -422,14 +422,14 @@ export class AgentREPL {
     const lower = question.toLowerCase();
 
     if (lower.includes('what can you do') || lower.includes('capability')) {
-      this.say(`I can help you with:
-• Planning and breaking down complex tasks
-• Coordinating multiple AI agents (Scout, Coder, Tester, Reviewer, Docs)
-• Detecting and managing required tools
-• Learning from experience to improve over time
-• Web scraping, development, debugging, documentation, and more
+      this.say(`我可以帮助您:
+• 规划和分解复杂任务
+• 协调多个 AI Agent (Scout, Coder, Tester, Reviewer, Docs)
+• 检测和管理所需工具
+• 从经验中学习并不断改进
+• 网页抓取、开发、调试、文档等
 
-Just tell me what you want to accomplish!`);
+告诉我您想要完成什么!`);
       return;
     }
 

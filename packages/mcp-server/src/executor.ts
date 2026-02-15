@@ -229,7 +229,7 @@ export async function executeWithVisualization(goal: string, options?: {
   // ═══════════════════════════════════════════════════════════
   // PHASE 2: Analysis
   // ═══════════════════════════════════════════════════════════
-  await printLoading('Analyzing goal...', 800);
+  await printLoading('正在分析目标...', 800);
   const analysis = deepAnalyze(goal);
   printAnalysis({
     domain: analysis.domain,
@@ -249,7 +249,7 @@ export async function executeWithVisualization(goal: string, options?: {
   // ═══════════════════════════════════════════════════════════
   // PHASE 4: Task Decomposition
   // ═══════════════════════════════════════════════════════════
-  await printLoading('Decomposing tasks...', 600);
+  await printLoading('正在分解任务...', 600);
   const tasks = await smartDecompose(analysis, goal);
   printTaskDecomposition(tasks.map((t: any) => ({
     id: t.id,
@@ -284,13 +284,13 @@ export async function executeWithVisualization(goal: string, options?: {
   // ═══════════════════════════════════════════════════════════
   if (showThinking && tasks.length > 0) {
     console.log(`${colors.gradient.primary}┌─────────────────────────────────────────────────────┐${'\x1b[0m'}`);
-    console.log(`${colors.gradient.primary}│${'\x1b[0m'} ${colors.bright}🎯 Master Agent Coordination Plan${colors.gradient.primary}${' '.repeat(15)}│${'\x1b[0m'}`);
+    console.log(`${colors.gradient.primary}│${'\x1b[0m'} ${colors.bright}🎯 Master Agent 协调计划${colors.gradient.primary}${' '.repeat(15)}│${'\x1b[0m'}`);
     console.log(`${colors.gradient.primary}├─────────────────────────────────────────────────────┤${'\x1b[0m'}`);
-    console.log(`${colors.gradient.primary}│${'\x1b[0m'}   ${colors.white}Analyzing task dependencies and execution order...${colors.gradient.primary}${' '.repeat(4)}│${'\x1b[0m'}`);
+    console.log(`${colors.gradient.primary}│${'\x1b[0m'}   ${colors.white}正在分析任务依赖和执行顺序...${colors.gradient.primary}${' '.repeat(4)}│${'\x1b[0m'}`);
     
     // Determine execution order
     const executionOrder = getExecutionOrder(tasks);
-    console.log(`${colors.gradient.primary}│${'\x1b[0m'}   ${colors.green}✓${colors.white} Optimal execution sequence:${colors.gradient.primary}${' '.repeat(18)}│${'\x1b[0m'}`);
+    console.log(`${colors.gradient.primary}│${'\x1b[0m'}   ${colors.green}✓${colors.white} 最优执行顺序:${colors.gradient.primary}${' '.repeat(18)}│${'\x1b[0m'}`);
     
     executionOrder.forEach((task: any, idx: number) => {
       const deps = task.dependencies?.length ? ` (→ ${task.dependencies.join(', ')})` : '';
@@ -545,7 +545,7 @@ async function executeTasksParallel(
       const agentState = agentStates.get(task.agentType)!;
       agentState.status = 'thinking';
       agentState.currentTask = task.name;
-      agentState.message = 'Analyzing task...';
+      agentState.message = '正在分析任务...';
       
       timeline.push({
         timestamp: Date.now(),
