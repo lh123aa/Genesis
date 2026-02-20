@@ -4,7 +4,7 @@ AI agent operating guide for this monorepo.
 
 ## 1. Project Overview
 
-**Stack**: Next.js 14 + Fastify v5 + TypeScript + Redis + Weaviate  
+**Stack**: Next.js 14 + Fastify v5 + TypeScript + Redis + Weaviate + MCP  
 **Type**: npm workspaces monorepo
 
 ```
@@ -12,7 +12,8 @@ apps/
   ├── backend/    # Fastify API (port 3002)
   └── frontend/   # Next.js (port 3000)
 packages/
-  └── shared/     # Shared utilities (@project-genesis/shared)
+  ├── shared/     # Shared utilities (@project-genesis/shared)
+  └── mcp-server/ # MCP Server for agent orchestration
 ```
 
 ## 2. Commands
@@ -25,23 +26,48 @@ packages/
 | `npm run build -w apps/frontend` | Build frontend |
 | `npm run build -w apps/backend` | Build backend |
 | `npm run build -w packages/shared` | Build shared (REQUIRED after changes) |
+| `npm run build -w packages/mcp-server` | Build MCP server |
 
 ### Dev Servers
 | Command | Purpose |
 |---------|---------|
 | `npm run dev -w apps/frontend` | Start frontend (port 3000) |
 | `npm run dev -w apps/backend` | Start backend (port 3002) |
+| `npm run dev -w packages/mcp-server` | Watch MCP server (dev mode) |
 | `docker-compose -f archive/v1/docker-compose.yml up -d` | Start Redis (6379) & Weaviate (8080) |
 
 ### Testing & Type Checking
 **No global test runner.** Run individual test files with `npx tsx`:
 ```bash
+# Shared package tests
 npx tsx packages/shared/test/memory.test.ts
 npx tsx packages/shared/test/panopticon.test.ts
+
+# Backend verification scripts
 npx tsx apps/backend/scripts/verify_fix.ts
+
+# MCP server tests
+npm run test -w packages/mcp-server
+npx tsx packages/mcp-server/scripts/demo-agent-mode.ts
+npx tsx packages/mcp-server/scripts/demo-autonomous-planning.ts
 ```
 
 TypeScript check per workspace: `npx tsc --noEmit -w apps/frontend`
+
+### MCP Server (Primary Interface)
+```bash
+# Build first (required)
+npm run build -w packages/mcp-server
+
+# Run in agent mode
+npm run agent -w packages/mcp-server
+
+# Demo modes
+npm run demo -w packages/mcp-server        # Full demo
+npm run demo:planning -w packages/mcp-server # Planning demo
+npm run demo:tools -w packages/mcp-server   # Tools demo
+npm run demo:learning -w packages/mcp-server # Self-learning demo
+```
 
 ### Verification Protocol
 1. Create test/verification script
@@ -88,7 +114,14 @@ import { FastifyInstance } from 'fastify';
 ### Error Handling
 - **Backend**: Log all errors, never swallow exceptions
 - **Frontend**: Use Error Boundaries, show user-friendly messages
+- **MCP Server**: Use Zod for validation, proper error codes
 - Include trace IDs in error logs
+
+### Git Workflow
+- Create feature branches for new features
+- Use descriptive commit messages
+- Never commit secrets or credentials
+- Run build before committing
 
 ## 4. Design System: "J.A.R.V.I.S."
 
